@@ -1,7 +1,7 @@
 #ifndef FIELD_H
 #define FIELD_H
 
-#include <string>
+#include <iostream>
 
 class Field {
 public:
@@ -10,6 +10,10 @@ public:
     std::string field[10][10];
 
     Field();
+    void setCell(int x, int y, std::string name);
+    std::string getCell(int x, int y);
+    int getWidth();
+    int getHeight();
     void printField();
 };
 

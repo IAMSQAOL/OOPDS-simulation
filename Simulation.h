@@ -11,7 +11,6 @@ class Simulation {
 public:
     Simulation();
     void readGameFile(const std::string& filename);
-
     Field field;
     Team team1;
     Team team2;

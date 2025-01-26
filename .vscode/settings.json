@@ -1,5 +1,5 @@
 {
-    "C_Cpp.default.compilerPath": "C:\\msys64\\mingw64\\bin\\g++.exe",
+    "C_Cpp.default.compilerPath": "C:\\msys64\\ucrt64\\bin\\g++.exe",
     "files.associations": {
         "array": "cpp",
         "atomic": "cpp",
@@ -46,6 +46,15 @@
         "stdexcept": "cpp",
         "streambuf": "cpp",
         "typeinfo": "cpp",
-        "ctime": "cpp"
+        "ctime": "cpp",
+        "charconv": "cpp",
+        "chrono": "cpp",
+        "ratio": "cpp",
+        "format": "cpp",
+        "iomanip": "cpp",
+        "span": "cpp",
+        "sstream": "cpp",
+        "text_encoding": "cpp",
+        "variant": "cpp"
     }
 }

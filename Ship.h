@@ -3,115 +3,106 @@
 
 #include <string>
 #include <iostream>
+#include "Field.h"
+#include <cstdlib>
+#include <ctime>
 
 class Ship {
 public:
+    int lives=3,posX=-1,posY=-1;
+    std::string name;
+    Field& field;
+    Ship(const std::string& name,Field& field);
     virtual ~Ship() = 0; // Pure virtual destructor to make Ship an abstract class
-    virtual void display() = 0; // Pure virtual function to display ship details
-    static Ship* createShip(const std::string& type); // Factory method to create ships
+    static Ship* createShip(const std::string& type, const std::string& name,Field& field); // Factory method to create ships
 };
 
 inline Ship::~Ship() {}
 
 class MovingShip : virtual public Ship {
-public:
+public: 
+    MovingShip(){};
+    MovingShip(const std::string& name,Field& field) : Ship(name,field) {}
     virtual void move() = 0; // Pure virtual function
 };
 
 class ShootingShip : virtual public Ship {
 public:
+    ShootingShip(){};
+    ShootingShip(const std::string& name,Field& field) : Ship(name,field) {}
     virtual void shoot() = 0; // Pure virtual function
 };
 
 class SeeingRobot : virtual public Ship {
 public:
+    SeeingRobot(){};
+    SeeingRobot(const std::string& name,Field& field) : Ship(name,field) {}
     virtual void see() = 0; // Pure virtual function
 };
 
 class RamShip : virtual public Ship {
 public:
+    RamShip(){};
+    RamShip(const std::string& name,Field& field) : Ship(name,field){}
     virtual void step() = 0; // Pure virtual function
 };
 
-class Cruiser : public MovingShip {
+class Battleship : public SeeingRobot, public MovingShip, public ShootingShip {
 public:
-    void move() override {
-        std::cout << "Cruiser is moving" << std::endl;
-    }
-    void display() override {
-        std::cout << "This is a Cruiser" << std::endl;
-    }
+    Battleship(const std::string& name,Field& field);
+    void see() override ;
+    void move() override; 
+    void shoot() override ;
+   
 };
 
-class Destroyer : public MovingShip, public RamShip {
+class Cruiser : public SeeingRobot,public RamShip {
 public:
-    void move() override {
-        std::cout << "Destroyer is moving" << std::endl;
-    }
-    void step() override {
-        std::cout << "Destroyer is stepping" << std::endl;
-    }
-    void display() override {
-        std::cout << "This is a Destroyer" << std::endl;
-    }
+    Cruiser(const std::string& name,Field& field) : Ship(name,field) {}
+    void see() override ;
+    void step() override ;
+    
 };
 
-class Frigate : public MovingShip, public ShootingShip, public SeeingRobot {
+class Destroyer : public SeeingRobot, ShootingShip,public RamShip {
 public:
-    void move() override {
-        std::cout << "Frigate is moving" << std::endl;
-    }
-    void shoot() override {
-        std::cout << "Frigate is shooting" << std::endl;
-    }
-    void see() override {
-        std::cout << "Frigate is seeing" << std::endl;
-    }
-    void display() override {
-        std::cout << "This is a Frigate" << std::endl;
-    }
+    Destroyer(const std::string& name,Field& field) : Ship(name,field) {}
+    void see() override ;
+    void shoot() override ;
+    void step() override ;
+
 };
 
-class Battleship : public MovingShip, public ShootingShip {
+class Frigate : public ShootingShip{
 public:
-    void move() override {
-        std::cout << "Battleship is moving" << std::endl;
-    }
-    void shoot() override {
-        std::cout << "Battleship is shooting" << std::endl;
-    }
-    void display() override {
-        std::cout << "This is a Battleship" << std::endl;
-    }
+    Frigate(const std::string& name,Field& field) : Ship(name,field) {}
+    void shoot() override ;
+    
+
 };
 
-class Amphibious : public MovingShip {
+class Corvette : public ShootingShip {
 public:
-    void move() override {
-        std::cout << "Amphibious is moving" << std::endl;
-    }
-    void display() override {
-        std::cout << "This is an Amphibious Ship" << std::endl;
-    }
+    Corvette(const std::string& name,Field& field) : Ship(name,field) {}
+    void shoot() override ;
+
 };
 
-class SuperShip : public MovingShip, public ShootingShip, public SeeingRobot, public RamShip {
+class Amphibious : public SeeingRobot,public MovingShip,public ShootingShip{
 public:
-    void move() override {
-        std::cout << "SuperShip is moving" << std::endl;
-    }
-    void shoot() override {
-        std::cout << "SuperShip is shooting" << std::endl;
-    }
-    void see() override {
-        std::cout << "SuperShip is seeing" << std::endl;
-    }
-    void step() override {
-        std::cout << "SuperShip is stepping" << std::endl;
-    }
-    void display() override {
-        std::cout << "This is a SuperShip" << std::endl;
-    }
+    Amphibious(const std::string& name,Field& field) : Ship(name,field) {}
+    void see() override ;
+    void move() override ;
+    void shoot() override ;
+
 };
 
-#endif // SHIP_H
+class SuperShip : public ShootingShip, public SeeingRobot, public RamShip {
+public:
+    SuperShip(const std::string& name,Field& field) : Ship(name,field) {}
+    void shoot() override ;
+    void see() override ;
+    void step() override ;
+};
+
+#endif 
