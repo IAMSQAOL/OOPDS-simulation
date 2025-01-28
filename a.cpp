@@ -1,28 +1,27 @@
 #include <iostream>
 #include <cstdlib>
+#include<ctime>
 #include <fstream>
 using namespace std;
 
 class Field;
 class LinkedList;
+class Queue;
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 class Ship{
     public:
+        bool CanMove;
         char Team_name;
         string Ship_name,Ship_type;
         int Ship_lives=3;
         int Ship_kill_count=0;
-        int posX=-1,posY=-1;
+        int posX=-1,posY=-1,nextX=-1,nextY=-1;
         bool Ship_upgrade=false;
-        bool go_Up = false;
-        bool go_Down = false;
-        bool go_Left = false;
-        bool go_Right = false;
 
         Ship(){}
         virtual ~Ship(){}
-        virtual void actions(Field& field,LinkedList& ships) = 0;
-        static Ship* createShip(const char& Team_name,const string& Ship_Type,const string& Ship_name,Field& field,LinkedList& ships);
+        virtual void actions(Field& field,LinkedList& ships,Queue& DESships) = 0;
+        static Ship* createShip(const char& Team_name,const string& Ship_Type,const string& Ship_name,Field& field,LinkedList& ships,Queue& DESships);
 };
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 class Field{
@@ -31,7 +30,7 @@ class Field{
         bool start_readFile;
         string ignore_line;
         string field[10][10];
-
+        string backupfield[10][10];
         Field() : width(0), height(0), start_readFile(false), rowCount(0) {}
 
         void initialize(const string& filename) {
@@ -54,7 +53,8 @@ class Field{
                     col = 0;
                     for (char c : ignore_line) {
                         if (c == '0' || c == '1') {
-                            field[rowCount][col++] = c;
+                            field[rowCount][col] = c;
+                            backupfield[rowCount][col++] = c; //backup is ass so i put ++ here
                             if (col >= width) break;
                         }
                     }
@@ -79,14 +79,20 @@ class Field{
         }
 
         void updateField(Ship* shipPtr, int y, int x) {
-            if (y < 0 || y >= height || x < 0 || x >= width) return;
                 field[y][x] = shipPtr->Ship_name;
         }
 
+        void FieldBack(int y,int x){
+            if(backupfield[y][x]=="0"){
+                field[y][x] = '0';
+            }else if(backupfield[y][x]=="1"){
+                 field[y][x] = '1';
+            }
+        }
         string checkCell(int y, int x) {
-            if (y < 0 || y >= height || x < 0 || x >= width) return "";
             return field[y][x];
         }
+
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -104,12 +110,12 @@ class MovingShip : virtual public Ship{
 
 class ShootingShip : virtual public Ship{
     public:
-        virtual void shoot(Field& field,LinkedList& ships)= 0;
+        virtual void shoot(Field& field,LinkedList& ships,Queue& DESships)= 0;
 };
 
 class RamShip : virtual public Ship{
     public:
-        virtual void step(Field& field,LinkedList& ships)= 0;
+        virtual void step(Field& field,LinkedList& ships,Queue& DESships)= 0;
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -124,7 +130,7 @@ struct Node{
 class LinkedList{
     public:
         Node* head;
-        LinkedList() : head(nullptr){} //do nothing
+        LinkedList() : head(nullptr){} 
 
         
         ~LinkedList(){
@@ -219,152 +225,42 @@ class LinkedList{
             cout << endl;
         }
 
-        string foundShip(int x, int y) {
-            Node* findaddress = head;
-            while (findaddress != nullptr) {
-                if (findaddress->shipPtr->posX == x && findaddress->shipPtr->posY == y) {
-                    return findaddress->shipPtr->Ship_name;
+        string findShipname(int x, int y) {
+            Node* findptr = head;
+            while (findptr != nullptr) {
+                if (findptr->shipPtr->posX == x && findptr->shipPtr->posY == y) {
+                    return findptr->shipPtr->Ship_name;
                 }
-                findaddress = findaddress->next;
+                findptr = findptr->next;
             }
-            return "nothing"; // Return an empty string if no ship is found at the given position
+            return "nothing"; 
         }
+
+        char findShipTeam(int x, int y) {
+            Node* findteam = head;
+            while (findteam != nullptr) {
+                if (findteam->shipPtr->posX == x && findteam->shipPtr->posY == y) {
+                    return findteam->shipPtr->Team_name;
+                }
+                findteam = findteam->next;
+            }
+            return '-';
+        }
+
+        Ship* findShipPtr(int x,int y){
+             Node* findShipptr = head;
+            while (findShipptr != nullptr) {
+                if (findShipptr->shipPtr->posX == x && findShipptr->shipPtr->posY == y) {
+                    return findShipptr->shipPtr;
+                }
+                findShipptr = findShipptr->next;
+                }
+            return nullptr;
+        }
+
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-class Battleship : public SeeingRobot,public MovingShip,public ShootingShip{
-    public:
-        Battleship(char Team_name,string Ship_name,Field& field,LinkedList& ships){
-            //srand(time(0));
-            this->Team_name = Team_name;
-            this->Ship_name = Ship_name;
-            this->Ship_type = "Battleship";
-            while(true){
-                this->posX = rand()%10;
-                this->posY = rand()%10;
-                if(field.checkCell(posY,posX)=="0"){
-                    field.updateField(this,posY,posX);
-                    break;
-                }
-            }
-        }
-
-        void look(Field& field,LinkedList& ships) override{
-            int startingX,endingX,startingY,endingY;
-            //remember row , column left -> down! so y is row and x is column
-            //for foundShip function,provide x first then y
-            if( this->posX-1<0 || this->posY-1<0 || this->posX+2>10 || this->posY+2>9){
-    
-            }else{
-                int startingX = (this->posX)-1;
-                cout << startingX << endl;
-                int endingX = (this->posX)+2;
-                cout << endingX << endl;
-                int startingY = (this->posY)-1;
-                cout << startingY << endl;
-                int endingY = (this->posY+2);
-                cout << endingX << endl;
-            }
-            for(int row=startingY;row<endingY;row++){
-                for(int column=startingX;row<endingY;column++){
-                    if(field.checkCell(row,column)==ships.foundShip(column,row)){
-                        cout<<this->Ship_name<<" found "<<ships.foundShip(column,row)<<" at (" << column <<","<<row<<") " << endl;
-                    }
-                }
-            }
-        }
-        void move(Field& field,LinkedList& ships) override{}
-        void shoot(Field& field,LinkedList& ships) override{}
-        void actions(Field& field,LinkedList& ships) override{
-            look(field,ships);
-        }
-};
-
-class Cruiser : public SeeingRobot,public RamShip{
-    public:
-        Cruiser(char Team_name,string Ship_name,Field& field,LinkedList& ships){
-            this->Team_name = Team_name;
-            this->Ship_name = Ship_name;
-            this->Ship_type = "Cruiser";
-            while(true){
-                this->posX = rand()%10;
-                this->posY = rand()%10;
-                if(field.checkCell(posX,posY)=="0"){
-                    field.updateField(this,posX,posY);
-                    break;
-                }
-            }
-        }
-   
-        void look(Field& field,LinkedList& ships) override{}
-        void step(Field& field,LinkedList& ships) override{}
-        void actions(Field& field,LinkedList& ships) override{}
-        
-};
-
-class Destroyer : public SeeingRobot,public ShootingShip,public RamShip{
-    public:
-        Destroyer(char Team_name,string Ship_name,Field& field,LinkedList& ships){
-            this->Team_name = Team_name;
-            this->Ship_name = Ship_name;
-            this->Ship_type = "Destroyer";
-             while(true){
-                this->posX = rand()%10;
-                this->posY = rand()%10;
-                if(field.checkCell(posX,posY)=="0"){
-                    field.updateField(this,posX,posY);
-                    break;
-                }
-            }
-        }
-
-        void look(Field& field,LinkedList& ships) override{}
-        void shoot(Field& field,LinkedList& ships) override{}
-        void step(Field& field,LinkedList& ships) override{}
-        void actions(Field& field,LinkedList& ships) override{}
-};
-
-class Frigate : public ShootingShip{
-    public:
-        Frigate(char Team_name,string Ship_name,Field& field,LinkedList& ships){
-            this->Team_name = Team_name;
-            this->Ship_name = Ship_name;
-            this->Ship_type = "Frigate";
-            while(true){
-                this->posX = rand()%10;
-                this->posY = rand()%10;
-                if(field.checkCell(posX,posY)=="0"){
-                    field.updateField(this,posX,posY);
-                    break;
-                }
-            }
-        }
-
-        void shoot(Field& field,LinkedList& ships) override{}
-        void actions(Field& field,LinkedList& ships) override{
-        }
-};
-
-//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-Ship* Ship::createShip(const char& Team_name,const string& Ship_Type,const string& Ship_name,Field& field,LinkedList& ships){
-            if(Ship_Type=="Battleship"){
-                return new Battleship(Team_name,Ship_name,field,ships);
-            }else if(Ship_Type=="Cruiser"){
-                return new Cruiser(Team_name,Ship_name,field,ships);
-            }else if(Ship_Type=="Destroyer"){
-                return new Destroyer(Team_name,Ship_name,field,ships);
-            }else if(Ship_Type=="Frigate"){
-                return new Frigate(Team_name,Ship_name,field,ships);
-            }else{
-                return nullptr;
-            }
-        }
-
-//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-
 class Queue{
     private:
         Node* front;
@@ -424,12 +320,21 @@ class Queue{
             }
         }
 
-        void dequeue(){
+        void dequeue(Field& field,LinkedList& ships){
             if(front == nullptr){
                 return;
             }
-
             Node* temp = front;
+            int newX, newY;
+            do {
+                newX = rand() % 10;
+                newY = rand() % 10;
+            } while (field.checkCell(newY, newX) != "0");
+            temp->shipPtr->posX = newX;
+            temp->shipPtr->posY = newY;
+            cout << temp->shipPtr->Ship_name <<" return to battlefield at ("<<newX <<","<<newY<<") !"<<endl;
+            field.updateField(temp->shipPtr, newY, newX);
+            ships.append(temp->shipPtr);
             front = front -> next;
             delete temp;
         }
@@ -448,7 +353,278 @@ class Queue{
 
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+class Battleship : public SeeingRobot,public MovingShip,public ShootingShip{
+    public:
+        Battleship(char Team_name,string Ship_name,Field& field,LinkedList& ships,Queue& DESships){
+            //srand(time(0));
+            this->Team_name = Team_name;
+            this->Ship_name = Ship_name;
+            this->Ship_type = "Battleship";
+            while(true){
+                this->posX = rand()%10;
+                this->posY = rand()%10;
+                if(field.checkCell(posY,posX)=="0"){
+                    field.updateField(this,posY,posX);
+                    break;
+                }
+            }
+        }
 
+        void look(Field& field,LinkedList& ships) override{
+            int startingX=0,endingX=0,startingY=0,endingY=0;
+            int NewP=0;
+            //remember row , column left -> down! so y is row and x is column
+            //for findShipname function,provide x first then y
+            if( this->posX-1<0 || this->posY-1<0 || this->posX+2>9 || this->posY+2>9){
+                if(this->posX-1<0 && this->posY-1<0){ //top left
+                    //cout <<"Enter top left" << endl;
+                    startingX=this->posX;
+                    startingY=this->posY;
+                    endingX=this->posX+2;
+                    endingY=this->posY+2;
+                }else if(this->posX+2>9 && this->posY-1<0){ //top right
+                    //cout <<"Enter top right" << endl;
+                    startingX=this->posX-1;
+                    startingY=this->posY;
+                    endingX=this->posX+1;
+                    endingY=this->posY+2; 
+                }else if(this->posX-1<0 && this->posY+2>9){
+                    //cout <<"Enter bottom left" << endl;
+                    startingX=this->posX;
+                    startingY=this->posY-1;
+                    endingX=this->posX+2;
+                    endingY=this->posY+1;    
+                }else if(this->posX+2>9 && posY+2>9){
+                    //cout <<"Enter bottom right" << endl;
+                    startingX=this->posX-1;
+                    startingY=this->posY-1;
+                    endingX=this->posX+1;
+                    endingY=this->posY+1;  
+                }else if(this->posX-1<0){
+                    //cout <<"Enter left" << endl;
+                    startingX=this->posX;
+                    startingY=this->posY-1;
+                    endingX=this->posX+2;
+                    endingY=this->posY+2;  
+                }else if(this->posY-1<0){
+                    //cout <<"Enter top" << endl;
+                    startingX=this->posX-1;
+                    startingY=this->posY;
+                    endingX=this->posX+2;
+                    endingY=this->posY+2;  
+                }else if(this->posX+2>9){
+                   //cout <<"Enter right" << endl;
+                    startingX=this->posX-1;
+                    startingY=this->posY-1;
+                    endingX=this->posX+1;
+                    endingY=this->posY+2;  
+                }else if(this->posY+2>9){
+                    //cout <<"Enter down" << endl;
+                    startingX=this->posX-1;
+                    startingY=this->posY-1;
+                    endingX=this->posX+1;
+                    endingY=this->posY+1;  
+                }
+            }else{
+                cout<<"Enter ram" << endl;
+                startingX = (this->posX)-1;
+                //cout << startingX << endl;
+                endingX = (this->posX)+2;
+                //cout << endingX << endl;
+                startingY = (this->posY)-1;
+                //cout << startingY << endl;
+                endingY = (this->posY+2);
+                //cout << endingY << endl;
+            }
+
+            for(int row=startingY;row<endingY;row++){
+                for(int column=startingX;column<endingX;column++){
+                    //cout <<column<<","<<row<<endl;
+                    //cout<<ships.findShipname(column,row)<<endl;
+                    if(field.checkCell(row,column)==ships.findShipname(column,row)&&field.checkCell(row,column)!=this->Ship_name&&ships.findShipTeam(column,row)!=this->Team_name){
+                        cout<<this->Ship_name<<" found Enemy ship: "<<ships.findShipname(column,row)<<" at (" << column <<","<<row<<") " << endl;
+                    }else if(field.checkCell(row,column)==ships.findShipname(column,row)&&field.checkCell(row,column)!=this->Ship_name&&ships.findShipTeam(column,row)==this->Team_name){
+                        cout<<this->Ship_name<<" found Freindly Ship: "<<ships.findShipname(column,row)<<" at (" << column <<","<<row<<") " << endl;
+                    }
+                    if(field.checkCell(row,column)=="0"){
+                        if( row==this->posY-1 && column==this->posX || row==posY+1 && column==this->posX || column==posX+1 && row==this->posY || column==posX-1 && row==this->posY){
+                            //cout<<this->Ship_name<<" can move to "<<column<<","<<row<<endl;
+                            ++NewP;
+                        }
+                    }
+                }
+            }
+            if(NewP!=0){  //laszy ass way to decide next move :)
+                CanMove = true;
+                int decide = (rand() % NewP)+1;
+                //cout << decide << endl;
+                int reaching=0;
+                for(int row=startingY;row<endingY;row++){
+                    for(int column=startingX;column<endingX;column++){
+                        if(field.checkCell(row,column)=="0"){
+                            if( row==this->posY-1 && column==this->posX || row==posY+1 && column==this->posX || column==posX+1 && row==this->posY || column==posX-1 && row==this->posY){
+                                if(reaching!=decide){
+                                    reaching++;
+                                    if(reaching==decide){
+                                        this->nextX=column;
+                                        this->nextY=row;
+                                        //cout<<this->nextX<<" and "<<this->nextY;
+                                        break;
+                                    }
+                                    //cout<<reaching<<endl;
+                                }
+                            }
+                        }
+                    }
+                }
+            }else if(NewP==0){
+                CanMove=false;
+            }
+        }
+        void move(Field& field,LinkedList& ships) override{
+            if(CanMove){
+                cout<<this->Ship_name<<" move to (" << this->nextX << "," << this->nextY <<")"<< endl; 
+                field.updateField(this,this->nextY,this->nextX);
+                field.FieldBack(this->posY,this->posX);
+                this->posX=this->nextX;
+                this->posY=this->nextY;
+                this->nextX=-1;
+                this->nextY=-1;
+                CanMove=false;
+            }else{
+                cout<<this->Ship_name<<" currently can't move.";
+            }
+        }
+        void shoot(Field& field,LinkedList& ships,Queue& DESships) override{
+            int x=0,y=0;
+            int shots=2;
+            int max_range = 5;
+            int calXY;
+            for(int i=0;i<shots;i++){
+                x = (rand() % 11)-5;
+                y = (rand() % 11)-5;
+                calXY = abs(x) + abs(y); //initialize
+                while(calXY>max_range || this->posX+x>9 || this->posX+x<0 || this->posY+y>9 || this->posY+y<0 || x==0 || y==0){ //if not less than 5
+                x = (rand() % 11)-5;
+                y = (rand() % 11)-5;
+                calXY = abs(x) + abs(y);
+                }
+                //cout <<x << " "<<y<<endl;
+                if(ships.findShipTeam(posX+x,posY+y)!=this->Team_name || field.checkCell(posY+y,posX+x)=="0" || field.checkCell(posY+y,posX+x)=="1"){
+                    //cout <<x << " "<<y<<endl; //check not same team also check not itself hehe
+                    if(field.checkCell(posY+y,posX+x)=="0" || field.checkCell(posY+y,posX+x)=="1" ){
+                        cout << this->Ship_name << " decide to shoot at "<<"(" <<this->posX+x<<","<<this->posY+y<<") and missed." <<endl;
+                    }
+                    if(field.checkCell(posY+y,posX+x)==ships.findShipname(posX+x,posY+y)){
+                        cout << this->Ship_name << " decide to shoot at "<<field.checkCell(posY+y,posX+x)<<"(" <<this->posX+x<<","<<this->posY+y<<") and successful!" <<endl;
+                        if(ships.findShipPtr(posX+x,posY+y)->Ship_lives!=0){
+                        ships.findShipPtr(posX+x,posY+y)->Ship_lives--;
+                        cout<<ships.findShipname(posX+x,posY+y)<<" remain "<<ships.findShipPtr(posX+x,posY+y)->Ship_lives <<" lives."<<endl;;
+                        field.FieldBack(posY+y,posX+x);
+                        DESships.enqueue(ships.findShipPtr(posX+x,posY+y));
+                        ships.deleteNode(ships.findShipPtr(posX+x,posY+y));
+                        }else if(ships.findShipPtr(posX+x,posY+y)->Ship_lives==0){
+                            cout << this->Ship_name << " eliminated "<<field.checkCell(posY+y,posX+x)<<") !" <<endl;
+                            field.FieldBack(posY+y,posX+x);
+                            ships.deleteNode(ships.findShipPtr(posX+x,posY+y));
+                        }
+                    }
+                }else if(ships.findShipTeam(posX+x,posY+y)==this->Team_name){
+                    cout << this->Ship_name << " cant shoot at "<<field.checkCell(posY+y,posX+x)<<"(" <<this->posX+x<<","<<this->posY+y<<") because they are the same team" <<endl;
+                }    
+            }
+        }
+        void actions(Field& field,LinkedList& ships,Queue& DESships) override{
+            cout<<this->Ship_type<<" "<<this->Ship_name<<" from Team " << this->Team_name <<" at (" << this->posX<<","<<this->posY<<") start actions:"<< endl;
+            look(field,ships);
+            move(field,ships);  
+            shoot(field,ships,DESships);
+            cout<<endl;
+        }
+};
+
+class Cruiser : public SeeingRobot,public RamShip{
+    public:
+        Cruiser(char Team_name,string Ship_name,Field& field,LinkedList& ships,Queue& DESships){
+            this->Team_name = Team_name;
+            this->Ship_name = Ship_name;
+            this->Ship_type = "Cruiser";
+           while(true){
+                this->posX = rand()%10;
+                this->posY = rand()%10;
+                if(field.checkCell(posY,posX)=="0"){
+                    field.updateField(this,posY,posX);
+                    break;
+                }
+            }
+        }
+   
+        void look(Field& field,LinkedList& ships) override{}
+        void step(Field& field,LinkedList& ships,Queue& DESships) override{}
+        void actions(Field& field,LinkedList& ships,Queue& DESships) override{}
+        
+};
+
+class Destroyer : public SeeingRobot,public ShootingShip,public RamShip{
+    public:
+        Destroyer(char Team_name,string Ship_name,Field& field,LinkedList& ships,Queue& DESships){
+            this->Team_name = Team_name;
+            this->Ship_name = Ship_name;
+            this->Ship_type = "Destroyer";
+            while(true){
+                this->posX = rand()%10;
+                this->posY = rand()%10;
+                if(field.checkCell(posY,posX)=="0"){
+                    field.updateField(this,posY,posX);
+                    break;
+                }
+            }
+        }
+
+        void look(Field& field,LinkedList& ships) override{}
+        void shoot(Field& field,LinkedList& ships,Queue& Dships) override{}
+        void step(Field& field,LinkedList& ships,Queue& Dships) override{}
+        void actions(Field& field,LinkedList& ships,Queue& DESships) override{}
+};
+
+class Frigate : public ShootingShip{
+    public:
+        Frigate(char Team_name,string Ship_name,Field& field,LinkedList& ships,Queue& DESships){
+            this->Team_name = Team_name;
+            this->Ship_name = Ship_name;
+            this->Ship_type = "Frigate";
+            while(true){
+                this->posX = rand()%10;
+                this->posY = rand()%10;
+                if(field.checkCell(posY,posX)=="0"){
+                    field.updateField(this,posY,posX);
+                    break;
+                }
+            }
+        }
+
+        void shoot(Field& field,LinkedList& ships,Queue& DESships) override{}
+        void actions(Field& field,LinkedList& ships,Queue& DESships) override{
+        }
+};
+
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Ship* Ship::createShip(const char& Team_name,const string& Ship_Type,const string& Ship_name,Field& field,LinkedList& ships,Queue& DESships){
+            if(Ship_Type=="Battleship"){
+                return new Battleship(Team_name,Ship_name,field,ships,DESships);
+            }else if(Ship_Type=="Cruiser"){
+                return new Cruiser(Team_name,Ship_name,field,ships,DESships);
+            }else if(Ship_Type=="Destroyer"){
+                return new Destroyer(Team_name,Ship_name,field,ships,DESships);
+            }else if(Ship_Type=="Frigate"){
+                return new Frigate(Team_name,Ship_name,field,ships,DESships);
+            }else{
+                return nullptr;
+            }
+        }
+
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 class Simulation{
     private:
@@ -457,6 +633,7 @@ class Simulation{
         int ships_count_in_Team, ship_num;
     public:
         int iterations;
+        Queue DESships;
         Field field;
         LinkedList ships;
         Simulation() {
@@ -474,7 +651,7 @@ class Simulation{
                 for (int i = 0; i < ships_count_in_Team; ++i) {
                     file >> Ship_Type >> Ship_symbol >> ship_num;
                     for (int j = 0; j < ship_num; ++j) {
-                        Ship* ship = Ship::createShip(Team_Name, Ship_Type, Ship_Name = Ship_symbol + to_string(j + 1),field,ships);
+                        Ship* ship = Ship::createShip(Team_Name, Ship_Type, Ship_Name = Ship_symbol + to_string(j + 1),field,ships,DESships);
                         if (ship) {
                             ships.append(ship);
                         }
@@ -482,6 +659,25 @@ class Simulation{
                 }
             }
             file.close();
+            StartGame();
+        }
+
+        void StartGame(){
+                cout << "Initialize:" << endl;
+                field.printField();
+                for(int x=1;x<iterations;x++){
+                    cout << "Turn " << x << endl;
+                    for(int j=0;j<2;j++){
+                        DESships.dequeue(field,ships); 
+                    }
+
+                    Node* temp = ships.head;
+                    while(temp != nullptr){
+                        temp -> shipPtr -> actions(field,ships,DESships);
+                        temp = temp -> next;
+                    }
+                    field.printField();
+            }
         }
 
         ~Simulation() {
@@ -492,18 +688,8 @@ class Simulation{
 
 
 int main(){
+    srand(time(0));
     Simulation sim;
     //sim.ships.display();
-    cout << "Initialize:" << endl;
-    sim.field.printField();
-    for(int x=1;x<sim.iterations;x++){
-        cout << "Turn " << x << endl;
-        Node* temp = sim.ships.head;
-        while(temp != nullptr){
-            temp -> shipPtr -> actions(sim.field,sim.ships);
-            temp = temp -> next;
-        }
-        sim.field.printField();
-    }
     return 0;
 }
