@@ -1,1 +1,0 @@
-g++ -o a main.cpp Field.h Field.cpp LinkedList.h Ship.h Ship.cpp Simulation.h Simulation.cpp Team.h
