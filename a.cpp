@@ -1,6 +1,7 @@
 #include <iostream>
 #include <cstdlib>
 #include<ctime>
+#include <filesystem>
 #include <fstream>
 using namespace std;
 
@@ -23,6 +24,7 @@ class Ship{
         int record = 0;
         int targetX =-1;
         int targetY=-1;
+        bool Ship_die = false;
 
         Ship(){}
         virtual ~Ship(){}
@@ -302,7 +304,7 @@ class Stack{
         };
         Node* top;
     public:
-        int size;
+        int size=0;
         const int maxSize=5;
         Stack() : top(nullptr),size(0){}
 
@@ -323,7 +325,8 @@ class Stack{
             newNode->next = top;
             top = newNode;
             size++;
-        }
+            //cout << "checking " << size  << endl;
+            }
 
         Ship* pop(){
             if(isEmpty()){
@@ -335,6 +338,7 @@ class Stack{
             top = top->next;
             delete temp;
             size--;
+            //cout << "check2 " << size  << endl;
             return shipPtr;
         }
 
@@ -613,31 +617,36 @@ class Battleship : public SeeingRobot,public MovingShip,public ShootingShip{
                     }
                     if(field.checkCell(posY+y,posX+x)==ships.findShipname(posX+x,posY+y)){
                         cout << this->Ship_name << " decide to shoot at "<<field.checkCell(posY+y,posX+x)<<"(" <<this->posX+x<<","<<this->posY+y<<") and successful!" <<endl;
-                        if(ships.findShipPtr(posX+x,posY+y)->Ship_lives!=1){
+                        if(ships.findShipPtr(posX+x,posY+y)->Ship_lives>1){
                         ships.findShipPtr(posX+x,posY+y)->Ship_lives--;
                         this->Ship_kill_count++;
-                        cout<<ships.findShipname(posX+x,posY+y)<<" remain "<<ships.findShipPtr(posX+x,posY+y)->Ship_lives <<" lives."<<endl;;
-                        field.FieldBack(posY+y,posX+x);
+                        cout<<ships.findShipname(posX+x,posY+y)<<" remain "<<ships.findShipPtr(posX+x,posY+y)->Ship_lives <<" lives."<<endl;
+                        if(ships.findShipPtr(posX+x,posY+y)->Ship_upgrade==false){
                         DESships.enqueue(ships.findShipPtr(posX+x,posY+y));
+                        }
                         ships.deleteNode(ships.findShipPtr(posX+x,posY+y));
+                        field.FieldBack(posY+y,posX+x);
                         //4 to Ds
                             if(this->Ship_kill_count==4){
                                 cout << this->Ship_name << " upgrade to Destroyer!" << endl;
                                 Ship* ship=updateShip(this->Team_name,"Destroyer",this->Ship_name,this->posX,this->posY,field,ships,DESships,uS);
+                                this->Ship_upgrade=true;
                                 uS.push(ship);
                                 break;
                                 //(const char& Team_name,const string& Ship_Type,const string& Ship_name,const int& posX,const int& posY,Field& field,LinkedList& ships,Queue& DESships)
                             }
-                        }else if(ships.findShipPtr(posX+x,posY+y)->Ship_lives==1){
-                            cout << this->Ship_name << " eliminated "<<field.checkCell(posY+y,posX+x)<<") !" <<endl;
-                            field.FieldBack(posY+y,posX+x);
+                        }else if(ships.findShipPtr(posX+x,posY+y)->Ship_lives==1 && ships.findShipPtr(posX+x,posY+y)->Ship_die==false){
+                            ships.findShipPtr(this->posX+x,this->posY+y)->Ship_die=true;
+                            cout << this->Ship_name << " eliminated "<<field.checkCell(posY+y,posX+x)<<"(" <<this->posX+x<<","<<this->posY+y<<") !" <<endl;
                             ships.deleteNode(ships.findShipPtr(posX+x,posY+y));
-                             if(this->Ship_kill_count==4){
+                            field.FieldBack(posY+y,posX+x);
+                            if(this->Ship_kill_count==4){
                                 cout << this->Ship_name << " upgrade to Destroyer!" << endl;
                                 Ship* ship=updateShip(this->Team_name,"Destroyer",this->Ship_name,this->posX,this->posY,field,ships,DESships,uS);
+                                this->Ship_upgrade=true;
                                 uS.push(ship);
                                 break;
-                                }  
+                            }  
                         }
                     }
                 }  
@@ -789,10 +798,13 @@ class Cruiser : public SeeingRobot,public RamShip{ //3 to Ds
             if(CanMove){
                 if(ships.findShipTeam(this->nextX,this->nextY)==this->Team_name && field.checkCell(this->nextY,this->nextX)!="0"){
                     cout<<this->Ship_name<<" step on friendly ship: "<<ships.findShipname(this->nextX,this->nextY)<< "(" << this->nextX << "," << this->nextY <<")"<< endl; 
-                    if(ships.findShipPtr(this->nextX,this->nextY)->Ship_lives!=1){
+                    if(ships.findShipPtr(this->nextX,this->nextY)->Ship_lives>1){
                         ships.findShipPtr(this->nextX,this->nextY)->Ship_lives--;
                         cout<<ships.findShipname(this->nextX,this->nextY)<<" remain "<<ships.findShipPtr(this->nextX,this->nextY)->Ship_lives <<" lives."<<endl;
+                        //field.FieldBack(this->posY,this->posX);
+                        if(ships.findShipPtr(this->nextX,this->nextY)->Ship_upgrade==false){
                         DESships.enqueue(ships.findShipPtr(this->nextX,this->nextY));
+                        }
                         ships.deleteNode(ships.findShipPtr(this->nextX,this->nextY));
                         field.updateField(this,this->nextY,this->nextX);
                         field.FieldBack(this->posY,this->posX);
@@ -809,7 +821,8 @@ class Cruiser : public SeeingRobot,public RamShip{ //3 to Ds
                                 uS.push(ship);
                                 return;
                             }
-                    }else if(ships.findShipPtr(this->nextX,this->nextY)->Ship_lives==1){
+                    }else if(ships.findShipPtr(this->nextX,this->nextY)->Ship_lives==1 && ships.findShipPtr(this->nextX,this->nextY)->Ship_die==false){
+                        ships.findShipPtr(this->nextX,this->nextY)->Ship_die=true;
                         cout << this->Ship_name << " step on " << field.checkCell(this->nextY,this->nextX) << " and eliminated it!" << endl;
                         ships.deleteNode(ships.findShipPtr(this->nextX,this->nextY));
                         field.updateField(this,this->nextY,this->nextX);
@@ -830,10 +843,12 @@ class Cruiser : public SeeingRobot,public RamShip{ //3 to Ds
                     }
                 }else if(ships.findShipTeam(this->nextX,this->nextY)!=this->Team_name && field.checkCell(this->nextY,this->nextX)!="0"){
                     cout<<this->Ship_name<<" step on enemy ship: "<<ships.findShipname(this->nextX,this->nextY)<< "(" << this->nextX << "," << this->nextY <<")"<< endl; 
-                    if(ships.findShipPtr(this->nextX,this->nextY)->Ship_lives!=1){
+                    if(ships.findShipPtr(this->nextX,this->nextY)->Ship_lives>1){
                         ships.findShipPtr(this->nextX,this->nextY)->Ship_lives--;
                         cout<<ships.findShipname(this->nextX,this->nextY)<<" remain "<<ships.findShipPtr(this->nextX,this->nextY)->Ship_lives <<" lives."<<endl;
+                        if(ships.findShipPtr(this->nextX,this->nextY)->Ship_upgrade==false){
                         DESships.enqueue(ships.findShipPtr(this->nextX,this->nextY));
+                        }
                         ships.deleteNode(ships.findShipPtr(this->nextX,this->nextY));
                         field.updateField(this,this->nextY,this->nextX);
                         field.FieldBack(this->posY,this->posX);
@@ -850,7 +865,8 @@ class Cruiser : public SeeingRobot,public RamShip{ //3 to Ds
                                 uS.push(ship);
                                 return;
                             }
-                    }else if(ships.findShipPtr(this->nextX,this->nextY)->Ship_lives==1){
+                    }else if(ships.findShipPtr(this->nextX,this->nextY)->Ship_lives==1 && ships.findShipPtr(this->nextX,this->nextY)->Ship_die==false){
+                        ships.findShipPtr(this->nextX,this->nextY)->Ship_die=true;
                         cout << this->Ship_name << " step on " << field.checkCell(this->nextY,this->nextX) << " and eliminated it!" << endl;
                         ships.deleteNode(ships.findShipPtr(this->nextX,this->nextY));
                         field.updateField(this,this->nextY,this->nextX);
@@ -901,7 +917,9 @@ class Destroyer : public SeeingRobot,public ShootingShip,public RamShip{ //3 to 
             this->Ship_type = "Destroyer";
             this->posX = posX;
             this->posY = posY;
-            field.updateField(this,posY,posX);
+        }
+        void updateF(Field& field){
+            field.updateField(this,this->posY,this->posX);
         }
 
         void look(Field& field,LinkedList& ships) override{
@@ -1025,10 +1043,12 @@ class Destroyer : public SeeingRobot,public ShootingShip,public RamShip{ //3 to 
             if(CanMove){
                 if(ships.findShipTeam(this->nextX,this->nextY)==this->Team_name && field.checkCell(this->nextY,this->nextX)!="0"){
                     cout<<this->Ship_name<<" step on friendly ship: "<<ships.findShipname(this->nextX,this->nextY)<< "(" << this->nextX << "," << this->nextY <<")"<< endl; 
-                    if(ships.findShipPtr(this->nextX,this->nextY)->Ship_lives!=1){
+                    if(ships.findShipPtr(this->nextX,this->nextY)->Ship_lives>1){
                         ships.findShipPtr(this->nextX,this->nextY)->Ship_lives--;
                         cout<<ships.findShipname(this->nextX,this->nextY)<<" remain "<<ships.findShipPtr(this->nextX,this->nextY)->Ship_lives <<" lives."<<endl;
+                        if(ships.findShipPtr(this->nextX,this->nextY)->Ship_upgrade==false){
                         DESships.enqueue(ships.findShipPtr(this->nextX,this->nextY));
+                        }
                         ships.deleteNode(ships.findShipPtr(this->nextX,this->nextY));
                         field.updateField(this,this->nextY,this->nextX);
                         field.FieldBack(this->posY,this->posX);
@@ -1041,10 +1061,12 @@ class Destroyer : public SeeingRobot,public ShootingShip,public RamShip{ //3 to 
                             if(this->Ship_kill_count==3){
                                 cout << this->Ship_name << " upgrade to SuperShip!" << endl;
                                 Ship* ship=updateShip(this->Team_name,"SuperShip",this->Ship_name,this->posX,this->posY,field,ships,DESships,uS);
+                                this->Ship_upgrade=true;
                                 uS.push(ship);
                                 return;
                             }
-                    }else if(ships.findShipPtr(this->nextX,this->nextY)->Ship_lives==1){
+                    }else if(ships.findShipPtr(this->nextX,this->nextY)->Ship_lives==1 && ships.findShipPtr(this->nextX,this->nextY)->Ship_die==false){
+                        ships.findShipPtr(this->nextX,this->nextY)->Ship_die=true;
                         cout << this->Ship_name << " step on " << field.checkCell(this->nextY,this->nextX) << " and eliminated it!" << endl;
                         ships.deleteNode(ships.findShipPtr(this->nextX,this->nextY));
                         field.updateField(this,this->nextY,this->nextX);
@@ -1057,6 +1079,7 @@ class Destroyer : public SeeingRobot,public ShootingShip,public RamShip{ //3 to 
                         this->Ship_kill_count++;
                         if(this->Ship_kill_count==3){
                             cout << this->Ship_name << " upgrade to SuperShip!" << endl;
+                            this->Ship_upgrade=true;
                             Ship* ship=updateShip(this->Team_name,"SuperShip",this->Ship_name,this->posX,this->posY,field,ships,DESships,uS);
                             uS.push(ship);
                             return;
@@ -1064,10 +1087,12 @@ class Destroyer : public SeeingRobot,public ShootingShip,public RamShip{ //3 to 
                     }
                 }else if(ships.findShipTeam(this->nextX,this->nextY)!=this->Team_name && field.checkCell(this->nextY,this->nextX)!="0"){
                     cout<<this->Ship_name<<" step on enemy ship: "<<ships.findShipname(this->nextX,this->nextY)<< "(" << this->nextX << "," << this->nextY <<")"<< endl; 
-                    if(ships.findShipPtr(this->nextX,this->nextY)->Ship_lives!=1){
+                    if(ships.findShipPtr(this->nextX,this->nextY)->Ship_lives>1){
                         ships.findShipPtr(this->nextX,this->nextY)->Ship_lives--;
                         cout<<ships.findShipname(this->nextX,this->nextY)<<" remain "<<ships.findShipPtr(this->nextX,this->nextY)->Ship_lives <<" lives."<<endl;
+                        if(ships.findShipPtr(this->nextX,this->nextY)->Ship_upgrade==false){
                         DESships.enqueue(ships.findShipPtr(this->nextX,this->nextY));
+                        }
                         ships.deleteNode(ships.findShipPtr(this->nextX,this->nextY));
                         field.updateField(this,this->nextY,this->nextX);
                         field.FieldBack(this->posY,this->posX);
@@ -1080,10 +1105,12 @@ class Destroyer : public SeeingRobot,public ShootingShip,public RamShip{ //3 to 
                             if(this->Ship_kill_count==3){
                                 cout << this->Ship_name << " upgrade to SuperShip!" << endl;
                                 Ship* ship=updateShip(this->Team_name,"SuperShip",this->Ship_name,this->posX,this->posY,field,ships,DESships,uS);
+                                this->Ship_upgrade=true;
                                 uS.push(ship);
                                 return;
                             }
-                    }else if(ships.findShipPtr(this->nextX,this->nextY)->Ship_lives==1){
+                    }else if(ships.findShipPtr(this->nextX,this->nextY)->Ship_lives==1 && ships.findShipPtr(this->nextX,this->nextY)->Ship_die==false){
+                        ships.findShipPtr(this->nextX,this->nextY)->Ship_die=true;
                         cout << this->Ship_name << " step on " << field.checkCell(this->nextY,this->nextX) << " and eliminated it!" << endl;
                         ships.deleteNode(ships.findShipPtr(this->nextX,this->nextY));
                         field.updateField(this,this->nextY,this->nextX);
@@ -1097,6 +1124,7 @@ class Destroyer : public SeeingRobot,public ShootingShip,public RamShip{ //3 to 
                         if(this->Ship_kill_count==3){
                             cout << this->Ship_name << " upgrade to SuperShip!" << endl;
                             Ship* ship=updateShip(this->Team_name,"SuperShip",this->Ship_name,this->posX,this->posY,field,ships,DESships,uS);
+                            this->Ship_upgrade=true;
                             uS.push(ship);
                             return;
                         }
@@ -1134,29 +1162,33 @@ class Destroyer : public SeeingRobot,public ShootingShip,public RamShip{ //3 to 
                     //cout <<x << " "<<y<<endl; //check not same team also check not itself hehe
                     if(field.checkCell(posY+y,posX+x)=="0" || field.checkCell(posY+y,posX+x)=="1" ){
                         cout << this->Ship_name << " decide to shoot at "<<"(" <<this->posX+x<<","<<this->posY+y<<") and missed." <<endl;
-                    }
-                    if(field.checkCell(posY+y,posX+x)==ships.findShipname(posX+x,posY+y)){
+                    }else if(field.checkCell(posY+y,posX+x)==ships.findShipname(posX+x,posY+y)){
                         cout << this->Ship_name << " decide to shoot at "<<field.checkCell(posY+y,posX+x)<<"(" <<this->posX+x<<","<<this->posY+y<<") and successful!" <<endl;
-                        if(ships.findShipPtr(posX+x,posY+y)->Ship_lives!=1){
+                        if(ships.findShipPtr(posX+x,posY+y)->Ship_lives>1){
                             ships.findShipPtr(posX+x,posY+y)->Ship_lives--;
                             this->Ship_kill_count++;
                             cout<<ships.findShipname(posX+x,posY+y)<<" remain "<<ships.findShipPtr(posX+x,posY+y)->Ship_lives <<" lives."<<endl;;
-                            field.FieldBack(posY+y,posX+x);
+                            if(ships.findShipPtr(posX+x,posY+y)->Ship_upgrade==false){
                             DESships.enqueue(ships.findShipPtr(posX+x,posY+y));
+                            }
                             ships.deleteNode(ships.findShipPtr(posX+x,posY+y));
+                            field.FieldBack(posY+y,posX+x);
                             if(this->Ship_kill_count==3){
                                 cout << this->Ship_name << " upgrade to SuperShip!" << endl;
                                 Ship* ship=updateShip(this->Team_name,"SuperShip",this->Ship_name,this->posX,this->posY,field,ships,DESships,uS);
+                                this->Ship_upgrade=true;
                                 uS.push(ship);
                                 break;
                             }
-                        }else if(ships.findShipPtr(posX+x,posY+y)->Ship_lives==1){
-                            cout << this->Ship_name << " eliminated "<<field.checkCell(posY+y,posX+x)<<") !" <<endl;
-                            field.FieldBack(posY+y,posX+x);
-                            ships.deleteNode(ships.findShipPtr(posX+x,posY+y));
+                        }else if(ships.findShipPtr(this->posX+x,this->posY+y)->Ship_lives==1 && ships.findShipPtr(this->posX+x,this->posY+y)->Ship_die==false){
+                            ships.findShipPtr(this->posX+x,this->posY+y)->Ship_die==true;
+                            cout << this->Ship_name << " eliminated "<<field.checkCell(posY+y,posX+x)<<"(" <<this->posX+x<<","<<this->posY+y<<") !" <<endl;
+                            ships.deleteNode(ships.findShipPtr(this->posX+x,this->posY+y));
+                            field.FieldBack(this->posY+y,this->posX+x);
                              if(this->Ship_kill_count==3){
                                 cout << this->Ship_name << " upgrade to SuperShip!" << endl;
                                 Ship* ship=updateShip(this->Team_name,"SuperShip",this->Ship_name,this->posX,this->posY,field,ships,DESships,uS);
+                                this->Ship_upgrade=true;
                                 uS.push(ship);
                                 break;
                                 }  
@@ -1166,9 +1198,16 @@ class Destroyer : public SeeingRobot,public ShootingShip,public RamShip{ //3 to 
             }
         }
         void actions(Field& field,LinkedList& ships,Queue& DESships,Stack& uS) override{
+            if(!this->ShootPosition){
+                updateF(field);
+                this->ShootPosition=true;
+            }
             cout<<this->Ship_type<<" "<<this->Ship_name<<" from Team " << this->Team_name <<" at (" << this->posX<<","<<this->posY<<") start actions:"<< endl;
             look(field,ships);
             step(field,ships,DESships,uS);
+            if(this->Ship_upgrade){
+                return;
+            }
             shoot(field,ships,DESships,uS);
             cout<<endl;
         }
@@ -1190,7 +1229,7 @@ class Frigate : public ShootingShip{ //cannot move,look,clockwise shoot,3 to cor
             }
         }
 
-        void shoot(Field& field,LinkedList& ships,Queue& DESships,Stack& uS) override{
+        void shoot(Field& field,LinkedList& ships,Queue& DESships,Stack& uS) override{ //sorry but i refuse
             if(this->record>7){
                 this->record=0;
             }
@@ -1204,8 +1243,8 @@ class Frigate : public ShootingShip{ //cannot move,look,clockwise shoot,3 to cor
                 {-1, 0},  // Left
                 {-1, -1}  // Up-Left
                 };
-            while(!this->ShootPosition || this->posX + directions[record][0]<0 || this->posY + directions[record][1]<0 || this->posX + directions[record][0]>9 || this->posY + directions[record][1]>9 ){
-                for (int i = this->record; i < 8; i++) {
+            if(!this->ShootPosition){
+                for (int i = 0; i < 8; i++) {
                     if( this->posX + directions[i][0]>=0 && this->posY + directions[i][1]>=0 && this->posX + directions[i][0]<10 && this->posY + directions[i][1]<10){
                         //cout<<i<< endl;
                         this->targetX = this->posX + directions[i][0];
@@ -1218,7 +1257,6 @@ class Frigate : public ShootingShip{ //cannot move,look,clockwise shoot,3 to cor
             }
 
             if(this->ShootPosition){
-
                     string targetName = ships.findShipname(this->targetX, this->targetY);
                     if (targetName != "nothing" && ships.findShipTeam(this->targetX, this->targetY) != this->Team_name) {
                         cout << this->Ship_name << " shoots at (" << targetX << "," << targetY << ") and hits enemy ship: " << targetName << "!" << endl;
@@ -1226,20 +1264,24 @@ class Frigate : public ShootingShip{ //cannot move,look,clockwise shoot,3 to cor
                         targetShip->Ship_lives--;
                         if(targetShip->Ship_lives>1){
                         cout<<targetShip->Ship_name<<" remain "<<targetShip->Ship_lives << " lives." << endl;
+                        if(targetShip->Ship_upgrade==false){
                         DESships.enqueue(targetShip);
+                        }
                         ships.deleteNode(targetShip);
                         field.FieldBack(this->targetY, this->targetX);
                         this->Ship_kill_count++;
                             if(this->Ship_kill_count==3){
                                 cout << this->Ship_name << " upgrade to Corvette!" << endl;
                                 Ship* ship=updateShip(this->Team_name,"Corvette",this->Ship_name,this->posX,this->posY,field,ships,DESships,uS);
+                                this->Ship_upgrade=true;
                                 uS.push(ship);
                                 return;
                             }
-                        }else if (targetShip->Ship_lives == 1) {
+                        }else if (targetShip->Ship_lives == 1 && targetShip->Ship_die==false) {
+                            targetShip->Ship_die=true;
                             cout << targetName << " is eliminated by "<<this->Ship_name<< "!" << endl;
-                            field.FieldBack(targetY, targetX);
                             ships.deleteNode(targetShip);
+                            field.FieldBack(targetY, targetX);
                             this->Ship_kill_count++;
                             if(this->Ship_kill_count==3){
                                 cout << this->Ship_name << " upgrade to Corvette!" << endl;
@@ -1248,13 +1290,18 @@ class Frigate : public ShootingShip{ //cannot move,look,clockwise shoot,3 to cor
                                 return;
                             }
                         }
-                    } else {
-                        cout << this->Ship_name << " shoots at (" << this->targetX << "," << this->targetY << ") and misses." << endl;
+                    }else {
+                        cout << this->Ship_name << " shoots at (" << targetX << "," << targetY << ") and missed the shot.." << endl;
+                    }
+                    record++;
+                    this->targetX = this->posX + directions[this->record][0];
+                    this->targetY = this->posY + directions[this->record][1];
+                    if(targetX<0||targetY<0||targetX>9||targetY>9){
+                        this->ShootPosition=false;
                     }
                 }
-                this->targetX = this->posX + directions[this->record][0];
-                this->targetY = this->posY + directions[this->record++][1];
             }
+
         void actions(Field& field,LinkedList& ships,Queue& DESships,Stack& uS) override{
             cout << this->Ship_type << " " << this->Ship_name << " from Team " << this->Team_name << " at (" << this->posX << "," << this->posY << ") start actions:" << endl;
             shoot(field, ships, DESships,uS);
@@ -1271,8 +1318,12 @@ public:
             this->Ship_lives=3;
             this->posX = posX;
             this->posY = posY;
-            field.updateField(this,posY,posX);
     }
+
+    void updateF(Field& field){
+        field.updateField(this,this->posY,this->posX);
+        }
+
     void shoot(Field& field,LinkedList& ships,Queue& DESships,Stack& uS) override{
             int x=0,y=0;
             int shots=2;
@@ -1292,25 +1343,32 @@ public:
                     if(field.checkCell(posY+y,posX+x)=="0" || field.checkCell(posY+y,posX+x)=="1" ){
                         cout << this->Ship_name << " decide to shoot at "<<"(" <<this->posX+x<<","<<this->posY+y<<") and missed." <<endl;
                     }
-                    if(field.checkCell(posY+y,posX+x)==ships.findShipname(posX+x,posY+y)){
+                    if(field.checkCell(this->posY+y,this->posX+x)==ships.findShipname(this->posX+x,this->posY+y)){
                         cout << this->Ship_name << " decide to shoot at "<<field.checkCell(posY+y,posX+x)<<"(" <<this->posX+x<<","<<this->posY+y<<") and successful!" <<endl;
-                        if(ships.findShipPtr(posX+x,posY+y)->Ship_lives!=1){
-                        ships.findShipPtr(posX+x,posY+y)->Ship_lives--;
+                        if(ships.findShipPtr(this->posX+x,this->posY+y)->Ship_lives>1){
+                        ships.findShipPtr(this->posX+x,this->posY+y)->Ship_lives--;
                         this->Ship_kill_count++;
-                        cout<<ships.findShipname(posX+x,posY+y)<<" remain "<<ships.findShipPtr(posX+x,posY+y)->Ship_lives <<" lives."<<endl;;
-                        field.FieldBack(posY+y,posX+x);
-                        DESships.enqueue(ships.findShipPtr(posX+x,posY+y));
-                        ships.deleteNode(ships.findShipPtr(posX+x,posY+y));
-                        }else if(ships.findShipPtr(posX+x,posY+y)->Ship_lives==1){
-                            cout << this->Ship_name << " eliminated "<<field.checkCell(posY+y,posX+x)<<") !" <<endl;
-                            field.FieldBack(posY+y,posX+x);
+                        cout<<ships.findShipname(this->posX+x,this->posY+y)<<" remain "<<ships.findShipPtr(this->posX+x,this->posY+y)->Ship_lives <<" lives."<<endl;;
+                        if(ships.findShipPtr(this->posX+x,this->posY+y)->Ship_upgrade==false){
+                            DESships.enqueue(ships.findShipPtr(this->posX+x,this->posY+y));
+                        }
+                        ships.deleteNode(ships.findShipPtr(this->posX+x,this->posY+y));
+                        field.FieldBack(this->posY+y,this->posX+x);
+                        }else if(ships.findShipPtr(this->posX+x,this->posY+y)->Ship_lives==1 && ships.findShipPtr(this->posX+x,this->posY+y)->Ship_die==false){
+                            ships.findShipPtr(this->nextX,this->nextY)->Ship_die=true;
+                            cout << this->Ship_name << " eliminated "<<field.checkCell(posY+y,posX+x)<<"(" <<this->posX+x<<","<<this->posY+y<<") !" <<endl;
                             ships.deleteNode(ships.findShipPtr(posX+x,posY+y));
+                            field.FieldBack(posY+y,posX+x);
                         }
                     }
                 }  
             }
     }
     void actions(Field& field,LinkedList& ships,Queue& DESships,Stack& uS) override{
+        if(!this->ShootPosition){
+                updateF(field);
+                this->ShootPosition=true;
+            }
         cout << this->Ship_type << " " << this->Ship_name << " from Team " << this->Team_name << " at (" << this->posX << "," << this->posY << ") start actions:" << endl;
         shoot(field, ships, DESships,uS);
     }
@@ -1478,28 +1536,33 @@ public:
                     }
                     if(field.checkCell(posY+y,posX+x)==ships.findShipname(posX+x,posY+y)){
                         cout << this->Ship_name << " decide to shoot at "<<field.checkCell(posY+y,posX+x)<<"(" <<this->posX+x<<","<<this->posY+y<<") and successful!" <<endl;
-                        if(ships.findShipPtr(posX+x,posY+y)->Ship_lives!=1){
+                        if(ships.findShipPtr(posX+x,posY+y)->Ship_lives>1){
                         ships.findShipPtr(posX+x,posY+y)->Ship_lives--;
                         this->Ship_kill_count++;
                         cout<<ships.findShipname(posX+x,posY+y)<<" remain "<<ships.findShipPtr(posX+x,posY+y)->Ship_lives <<" lives."<<endl;;
-                        field.FieldBack(posY+y,posX+x);
-                        DESships.enqueue(ships.findShipPtr(posX+x,posY+y));
+                        if(ships.findShipPtr(posX+x,posY+y)->Ship_upgrade==false){
+                            DESships.enqueue(ships.findShipPtr(posX+x,posY+y));
+                        }
                         ships.deleteNode(ships.findShipPtr(posX+x,posY+y));
+                        field.FieldBack(posY+y,posX+x);
                         //4 to Ds
                             if(this->Ship_kill_count==4){
                                 cout << this->Ship_name << " upgrade to SuperShip!" << endl;
                                 Ship* ship=updateShip(this->Team_name,"SuperShip",this->Ship_name,this->posX,this->posY,field,ships,DESships,uS);
+                                this->Ship_upgrade=true;
                                 uS.push(ship);
                                 break;
                                 //(const char& Team_name,const string& Ship_Type,const string& Ship_name,const int& posX,const int& posY,Field& field,LinkedList& ships,Queue& DESships)
                             }
-                        }else if(ships.findShipPtr(posX+x,posY+y)->Ship_lives==1){
-                            cout << this->Ship_name << " eliminated "<<field.checkCell(posY+y,posX+x)<<") !" <<endl;
-                            field.FieldBack(posY+y,posX+x);
+                        }else if(ships.findShipPtr(posX+x,posY+y)->Ship_lives==1 && ships.findShipPtr(this->posX+x,this->posY+y)->Ship_die==false){
+                            ships.findShipPtr(this->posX+x,this->posY+y)->Ship_die==true;
+                            cout << this->Ship_name << " eliminated "<<field.checkCell(posY+y,posX+x)<<"(" <<this->posX+x<<","<<this->posY+y<<") !" <<endl;
                             ships.deleteNode(ships.findShipPtr(posX+x,posY+y));
+                            field.FieldBack(posY+y,posX+x);
                              if(this->Ship_kill_count==4){
                                 cout << this->Ship_name << " upgrade to SuperShip!" << endl;
                                 Ship* ship=updateShip(this->Team_name,"SuperShip",this->Ship_name,this->posX,this->posY,field,ships,DESships,uS);
+                                this->Ship_upgrade=true;
                                 uS.push(ship);
                                 break;
                                 }  
@@ -1526,7 +1589,10 @@ public:
             this->Ship_type = "SuperShip";
             this->posX = posX;
             this->posY = posY;
-            field.updateField(this,posY,posX);
+    }
+
+    void updateF(Field& field){
+        field.updateField(this,this->posY,this->posX);
     }
     void look(Field& field,LinkedList& ships) override{
         int startingX=0,endingX=0,startingY=0,endingY=0;
@@ -1649,10 +1715,12 @@ public:
         if(CanMove){
                 if(ships.findShipTeam(this->nextX,this->nextY)==this->Team_name && field.checkCell(this->nextY,this->nextX)!="0"){
                     cout<<this->Ship_name<<" step on friendly ship: "<<ships.findShipname(this->nextX,this->nextY)<< "(" << this->nextX << "," << this->nextY <<")"<< endl; 
-                    if(ships.findShipPtr(this->nextX,this->nextY)->Ship_lives!=1){
+                    if(ships.findShipPtr(this->nextX,this->nextY)->Ship_lives>1){
                         ships.findShipPtr(this->nextX,this->nextY)->Ship_lives--;
                         cout<<ships.findShipname(this->nextX,this->nextY)<<" remain "<<ships.findShipPtr(this->nextX,this->nextY)->Ship_lives <<" lives."<<endl;
-                        DESships.enqueue(ships.findShipPtr(this->nextX,this->nextY));
+                        if(ships.findShipPtr(this->nextX,this->nextY)->Ship_upgrade==false){
+                            DESships.enqueue(ships.findShipPtr(this->nextX,this->nextY));
+                        }
                         ships.deleteNode(ships.findShipPtr(this->nextX,this->nextY));
                         field.updateField(this,this->nextY,this->nextX);
                         field.FieldBack(this->posY,this->posX);
@@ -1661,7 +1729,8 @@ public:
                         this->nextX=-1;
                         this->nextY=-1;
                         CanMove=false;
-                    }else if(ships.findShipPtr(this->nextX,this->nextY)->Ship_lives==1){
+                    }else if(ships.findShipPtr(this->nextX,this->nextY)->Ship_lives==1 && ships.findShipPtr(this->nextX,this->nextY)->Ship_die==false){
+                        ships.findShipPtr(this->nextX,this->nextY)->Ship_die==true;
                         cout << this->Ship_name << " step on " << field.checkCell(this->nextY,this->nextX) << " and eliminated it!" << endl;
                         ships.deleteNode(ships.findShipPtr(this->nextX,this->nextY));
                         field.updateField(this,this->nextY,this->nextX);
@@ -1674,10 +1743,12 @@ public:
                     }
                 }else if(ships.findShipTeam(this->nextX,this->nextY)!=this->Team_name && field.checkCell(this->nextY,this->nextX)!="0"){
                     cout<<this->Ship_name<<" step on enemy ship: "<<ships.findShipname(this->nextX,this->nextY)<< "(" << this->nextX << "," << this->nextY <<")"<< endl; 
-                    if(ships.findShipPtr(this->nextX,this->nextY)->Ship_lives!=1){
+                    if(ships.findShipPtr(this->nextX,this->nextY)->Ship_lives>1){
                         ships.findShipPtr(this->nextX,this->nextY)->Ship_lives--;
                         cout<<ships.findShipname(this->nextX,this->nextY)<<" remain "<<ships.findShipPtr(this->nextX,this->nextY)->Ship_lives <<" lives."<<endl;
-                        DESships.enqueue(ships.findShipPtr(this->nextX,this->nextY));
+                        if(ships.findShipPtr(this->nextX,this->nextY)->Ship_upgrade==false){
+                            DESships.enqueue(ships.findShipPtr(this->nextX,this->nextY));
+                        }
                         ships.deleteNode(ships.findShipPtr(this->nextX,this->nextY));
                         field.updateField(this,this->nextY,this->nextX);
                         field.FieldBack(this->posY,this->posX);
@@ -1686,7 +1757,8 @@ public:
                         this->nextX=-1;
                         this->nextY=-1;
                         CanMove=false;
-                    }else if(ships.findShipPtr(this->nextX,this->nextY)->Ship_lives==1){
+                    }else if(ships.findShipPtr(this->nextX,this->nextY)->Ship_lives==1 && ships.findShipPtr(this->nextX,this->nextY)->Ship_die==false){
+                        ships.findShipPtr(this->nextX,this->nextY)->Ship_die=true;
                         cout << this->Ship_name << " step on " << field.checkCell(this->nextY,this->nextX) << " and eliminated it!" << endl;
                         ships.deleteNode(ships.findShipPtr(this->nextX,this->nextY));
                         field.updateField(this,this->nextY,this->nextX);
@@ -1733,26 +1805,36 @@ public:
                     }
                     if(field.checkCell(posY+y,posX+x)==ships.findShipname(posX+x,posY+y)){
                         cout << this->Ship_name << " decide to shoot at "<<field.checkCell(posY+y,posX+x)<<"(" <<this->posX+x<<","<<this->posY+y<<") and successful!" <<endl;
-                        if(ships.findShipPtr(posX+x,posY+y)->Ship_lives!=1){
+                        if(ships.findShipPtr(posX+x,posY+y)->Ship_lives>1){
                             ships.findShipPtr(posX+x,posY+y)->Ship_lives--;
                             this->Ship_kill_count++;
                             cout<<ships.findShipname(posX+x,posY+y)<<" remain "<<ships.findShipPtr(posX+x,posY+y)->Ship_lives <<" lives."<<endl;;
-                            field.FieldBack(posY+y,posX+x);
-                            DESships.enqueue(ships.findShipPtr(posX+x,posY+y));
+                            if(ships.findShipPtr(posX+x,posY+y)->Ship_upgrade==false){
+                                DESships.enqueue(ships.findShipPtr(posX+x,posY+y));
+                            }
                             ships.deleteNode(ships.findShipPtr(posX+x,posY+y));
-                        }else if(ships.findShipPtr(posX+x,posY+y)->Ship_lives==1){
-                            cout << this->Ship_name << " eliminated "<<field.checkCell(posY+y,posX+x)<<") !" <<endl;
                             field.FieldBack(posY+y,posX+x);
+                        }else if(ships.findShipPtr(posX+x,posY+y)->Ship_lives==1 && ships.findShipPtr(this->posX+x,this->posY+y)->Ship_die==false){
+                            ships.findShipPtr(this->posX+x,this->posY+y)->Ship_die=true;
+                            cout << this->Ship_name << " eliminated "<<field.checkCell(posY+y,posX+x)<<"(" <<this->posX+x<<","<<this->posY+y<<") !" <<endl;
                             ships.deleteNode(ships.findShipPtr(posX+x,posY+y)); 
+                            field.FieldBack(posY+y,posX+x);
                         }
                     }
                 }  
             }
     }
     void actions(Field& field,LinkedList& ships,Queue& DESships,Stack& uS) override{
+            if(!this->ShootPosition){
+                updateF(field);
+                this->ShootPosition=true;
+            }
             cout<<this->Ship_type<<" "<<this->Ship_name<<" from Team " << this->Team_name <<" at (" << this->posX<<","<<this->posY<<") start actions:"<< endl;
             look(field,ships);
             step(field,ships,DESships,uS);
+            if(this->Ship_upgrade){
+                return;
+            }
             shoot(field,ships,DESships,uS);
             cout<<endl;
         }
@@ -1799,16 +1881,19 @@ public:
                 if (targetName != "nothing" && ships.findShipTeam(targetX, targetY) != this->Team_name) {
                     cout << this->Ship_name << " shoots at (" << targetX << "," << targetY << ") and hits " << targetName << "!" << endl;
                     Ship* targetShip = ships.findShipPtr(targetX, targetY);
-                    if(targetShip->Ship_lives > 0){
+                    if(targetShip->Ship_lives > 1){
                     targetShip->Ship_lives--;
                     cout<<targetName<<" remain " << targetShip->Ship_lives << " lives.";
-                    field.FieldBack(targetY,targetX);
-                    DESships.enqueue(targetShip);
+                    if(targetShip->Ship_upgrade==false){
+                        DESships.enqueue(targetShip);
+                    }
                     ships.deleteNode(targetShip);
-                    }else if (targetShip->Ship_lives <= 0) {
+                    field.FieldBack(targetY,targetX);
+                    }else if (targetShip->Ship_lives == 1 && targetShip->Ship_die==false) {
+                        targetShip->Ship_die=true;
                         cout << targetName << " is destroyed!" << endl;
-                        field.FieldBack(targetY, targetX);
                         ships.deleteNode(targetShip);
+                        field.FieldBack(targetY, targetX);
                     }
                 } else {
                     cout << this->Ship_name << " shoots at (" << targetX << "," << targetY << ") but the target disappear." << endl;
@@ -1924,6 +2009,7 @@ class Simulation{
                         temp -> shipPtr -> actions(field,ships,DESships,uS);
                         if(temp->shipPtr->Ship_upgrade==true){
                             uS2.push(temp->shipPtr);
+    
                             //ships.deleteNode(temp->shipPtr);
                             upgrade=true;
         
@@ -1932,19 +2018,21 @@ class Simulation{
                     }
 
                     if(upgrade==true){
-                        for(int x=0;x<uS.maxSize;x++){
+                        for(int x=0;x<5;x++){
                             if(!uS2.isEmpty()){
-                                ships.deleteNode(uS2.pop());
+                                Ship* deleteShip = uS2.pop(); //fucker this is so weird i need to create a pointer and the function will work
+                                ships.deleteNode(deleteShip);
                                 }
                             if(!uS.isEmpty()){
-                                ships.append(uS.pop());
+                                Ship* addShip = uS.pop();
+                                ships.append(addShip);
                             }
                         }
                         upgrade=false;
                     }
                     field.printField();
                     
-                    if(ships.remainTeam('A')==false && DESships.WaitTeam('A') == false|| DESships.WaitTeam('B') == false && ships.remainTeam('B')==false){
+                    if((ships.remainTeam('A')==false && DESships.WaitTeam('A') == false)|| (DESships.WaitTeam('B') == false && ships.remainTeam('B')==false)){
                         if(ships.remainTeam('A')==false){
                             cout<<endl;
                             cout<<"Team B win as Team A annihilated!" << endl;
