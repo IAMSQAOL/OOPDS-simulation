@@ -1,1 +1,1 @@
-g++ -Iinclude -o WarSHip_Simulation src/*.cpp
+g++ -Iinclude -o WarShip_Simulation src/*.cpp
