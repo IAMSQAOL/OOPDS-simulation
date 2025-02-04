@@ -1,10 +1,11 @@
 #include "Simulation.h"
+using namespace std;
 
-Simulation::Simulation() : mof("output1.txt") {
+Simulation::Simulation() : mof("out1put1.txt") {
             ifstream file("game.txt");
             if (!file) {
                 mof << "File not found" << endl;
-                exit(1);
+                return;
             }
             file >> ignore_line >> iterations;
             file >> ignore_line >> field.width;
