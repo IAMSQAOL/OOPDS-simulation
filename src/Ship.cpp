@@ -1,476 +1,42 @@
-#include <iostream>
-#include <cstdlib>
-#include<ctime>
+#include "Ship.h"
+#include "LinkedList.h"
+#include "Queue.h"
+#include "Field.h"
+#include "Stack.h"
 #include <fstream>
 using namespace std;
 
-
-class Field;
-class LinkedList;
-class Queue;
-class Stack;
-//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-class Ship{
-    public:
-        bool CanMove;
-        char Team_name;
-        string Ship_name,Ship_type;
-        int Ship_lives=3;
-        int Ship_kill_count=0;
-        int posX=-1,posY=-1,nextX=-1,nextY=-1;
-        bool Ship_upgrade=false;
-        bool ShootPosition=false;
-        int record = 0;
-        int targetX =-1;
-        int targetY=-1;
-        bool Ship_die = false;
-        
-
-        Ship(){}
-        virtual ~Ship(){}
-        virtual void actions(Field& field,LinkedList& ships,Queue& DESships,Stack& uS, ofstream& mof) = 0;
-        static Ship* createShip(const char& Team_name,const string& Ship_Type,const string& Ship_name,Field& field,LinkedList& ships,Queue& DESships,Stack& uS, ofstream& mof);
-        static Ship* updateShip(const char& Team_name,const string& Ship_Type,const string& Ship_name,const int& posX,const int& posY,Field& field,LinkedList& ships,Queue& DESships,Stack& uS, ofstream& mof);
-};
-//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-class Field{
-    public:
-        int width, height, rowCount, col;
-        bool start_readFile;
-        string ignore_line;
-        string field[10][10];
-        string backupfield[10][10];
-        Field() : width(0), height(0), start_readFile(false), rowCount(0){}
-
-        void initialize(const string& filename, ofstream& mof) {
-            ifstream file(filename);
-            if (!file) {
-                mof << "File not found" << endl;
-                exit(1);
-            }
-
-            while (getline(file, ignore_line)) {
-                if (!start_readFile) {
-                    if (ignore_line[0] == '0') {
-                        start_readFile = true;
-                    } else {
-                        continue;
-                    }
-                }
-
-                if (start_readFile && rowCount < height) {
-                    col = 0;
-                    for (char c : ignore_line) {
-                        if (c == '0' || c == '1') {
-                            field[rowCount][col] = c;
-                            backupfield[rowCount][col++] = c; //backup is ass so i put ++ here
-                            if (col >= width) break;
-                        }
-                    }
-                    rowCount++;
-                }
-            }
-            file.close();
-        }
-
-        void printField(ofstream& mof) {
-            for (int i = 0; i < height; ++i) {
-                for (int j = 0; j < width; ++j) {
-                    mof << field[i][j];
-                    if (field[i][j].length() == 1) {
-                        mof << "  "; // Two spaces for single-character strings
-                    } else {
-                        mof << " "; // One space for multi-character strings
-                    }
-                }
-                mof << endl;
-            }
-        }
-
-        void printBackField(ofstream& mof) {
-            for (int i = 0; i < height; ++i) {
-                for (int j = 0; j < width; ++j) {
-                    mof << backupfield[i][j];
-                    if (backupfield[i][j].length() == 1) {
-                        mof << "  "; // Two spaces for single-character strings
-                    } else {
-                        mof << " "; // One space for multi-character strings
-                    }
-                }
-                mof << endl;
-            }
-        }
-
-        void updateField(Ship* shipPtr, int y, int x) {
-                field[y][x] = shipPtr->Ship_name;
-        }
-
-        void FieldBack(int y,int x){
-            if(backupfield[y][x]=="0"){
-                field[y][x] = '0';
-            }else if(backupfield[y][x]=="1"){
-                 field[y][x] = '1';
-            }
-        }
-        string checkCell(int y, int x) {
-            return field[y][x];
-        }
-
-};
-
-//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-class SeeingRobot : virtual public Ship{
-    public:
-        
-        virtual void look(Field& field,LinkedList& ships, ofstream& mof)= 0;
-};
-
-class MovingShip : virtual public Ship{
-    public:
-        virtual void move(Field& field,LinkedList& ships, ofstream& mof)= 0;
-};
-
-class ShootingShip : virtual public Ship{
-    public:
-        virtual void shoot(Field& field,LinkedList& ships,Queue& DESships,Stack& uS, ofstream& mof)= 0;
-};
-
-class RamShip : virtual public Ship{
-    public:
-        virtual void step(Field& field,LinkedList& ships,Queue& DESships,Stack& uS, ofstream& mof)= 0;
-};
-
-//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-struct Node{ 
-    Ship* shipPtr;
-    Node* next;
-};
-
-//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-class LinkedList{
-    public:
-        Node* head;
-        LinkedList() : head(nullptr){} 
-
-        
-        ~LinkedList(){
-            clear();
-        }
-
-        LinkedList(const LinkedList& other) : head(nullptr) {
-            Node* temp = other.head;
-            while (temp != nullptr) {
-                append(temp->shipPtr);
-                temp = temp->next;
-            }
-        }
-
-        LinkedList& operator=(const LinkedList& other) {
-            if (this == &other) return *this;
-            clear();
-            Node* temp = other.head;
-            while (temp != nullptr) {
-                append(temp->shipPtr);
-                temp = temp->next;
-            }
-            return *this;
-        }
-
-        LinkedList(LinkedList&& other) noexcept : head(other.head) {
-            other.head = nullptr;
-        }
-
-        LinkedList& operator=(LinkedList&& other) noexcept {
-            if (this == &other) return *this;
-            clear();
-            head = other.head;
-            other.head = nullptr;
-            return *this;
-        }
-
-        void append(Ship* shipPtr){
-            Node * newNode = new Node();
-            newNode -> shipPtr = shipPtr; 
-            newNode -> next = nullptr;
-
-            if(head == nullptr){
-                head = newNode;
+Ship* Ship::createShip(const char& Team_name,const string& Ship_Type,const string& Ship_name,Field& field,LinkedList& ships,Queue& DESships,Stack& uS, ofstream& mof){
+            if(Ship_Type=="Battleship"){
+                return new Battleship(Team_name,Ship_name,field,ships,DESships,uS, mof);
+            }else if(Ship_Type=="Cruiser"){
+                return new Cruiser(Team_name,Ship_name,field,ships,DESships,uS, mof);
+            }else if(Ship_Type=="Frigate"){
+                return new Frigate(Team_name,Ship_name,field,ships,DESships,uS, mof);
+            }else if(Ship_Type=="Amphibious"){
+                return new Amphibious(Team_name,Ship_name,field,ships,DESships,uS, mof);
+            }else if(Ship_Type=="SniperShip"){
+                return new SniperShip(Team_name,Ship_name,field,ships,DESships,uS, mof);
             }else{
-                Node* temp = head;
-                while(temp -> next != nullptr){
-                    temp = temp -> next;
-                }
-                temp -> next = newNode;
-            }
-        }
-
-        void deleteNode(Ship* shipPtr){
-            Node* temp = head;
-            Node* prev = nullptr;
-
-            while(temp != nullptr && temp -> shipPtr != shipPtr){
-                prev = temp;
-                temp = temp -> next;
-            }
-
-            if(temp == nullptr){
-                return;
-            }
-
-            if(prev == nullptr){
-                head = temp -> next;
-            }else{
-                prev -> next = temp -> next;
-            }
-
-            delete temp;
-        }
-
-
-        void clear() {
-            Node* temp;
-            while(head!=nullptr){
-                temp = head;
-                head = head -> next;
-                delete temp;
-            }
-        }
-
-        void display(ofstream& mof){
-            Node* temp = head;
-            while(temp != nullptr){
-                mof << temp -> shipPtr ->Team_name << " , " << temp -> shipPtr -> Ship_name << " , " << temp -> shipPtr -> Ship_type << " , in (" << temp->shipPtr->posX <<","<<temp->shipPtr->posY<<")"<< endl;
-                temp = temp -> next;
-            }
-            mof << endl;
-        }
-
-        string findShipname(int x, int y) {
-            Node* findptr = head;
-            while (findptr != nullptr) {
-                if (findptr->shipPtr->posX == x && findptr->shipPtr->posY == y) {
-                    return findptr->shipPtr->Ship_name;
-                }
-                findptr = findptr->next;
-            }
-            return "nothing"; 
-        }
-
-        char findShipTeam(int x, int y) {
-            Node* findteam = head;
-            while (findteam != nullptr) {
-                if (findteam->shipPtr->posX == x && findteam->shipPtr->posY == y) {
-                    return findteam->shipPtr->Team_name;
-                }
-                findteam = findteam->next;
-            }
-            return '-';
-        }
-
-        Ship* findShipPtr(int x,int y){
-             Node* findShipptr = head;
-            while (findShipptr != nullptr) {
-                if (findShipptr->shipPtr->posX == x && findShipptr->shipPtr->posY == y) {
-                    return findShipptr->shipPtr;
-                }
-                findShipptr = findShipptr->next;
-                }
-            return nullptr;
-        }
-
-        bool remainTeam(char TeamName){
-            Node* ptr = head;
-            while (ptr != nullptr) {
-                if (ptr->shipPtr->Team_name == TeamName) {
-                    return true;
-                }
-                ptr = ptr->next;
-                }
-            return false;
-        }
-
-};
-
-//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-class Stack{
-    private:
-        struct Node{
-            Ship* shipPtr;
-            Node * next;
-        };
-        Node* top;
-
-        Ship* pop(){
-            if(isEmpty()){
-                cout<<"Stack empty dumbass your code suck" << endl;
                 return nullptr;
             }
-            Node*temp = top;
-            Ship* shipPtr = top ->shipPtr;
-            top = top->next;
-            delete temp;
-            size--;
-            //cout << "check2 " << size  << endl;
-            return shipPtr;
-        }
-    public:
-        int size=0;
-        const int maxSize=5;
-        Stack() : top(nullptr),size(0){}
-
-        bool isEmpty() const{
-            return top == nullptr;
-        }
-        bool isFull() const{
-            return size>= maxSize;
         }
 
-        void push(Ship* shipPtr, ofstream& mof){
-            if(isFull()){
-                mof<<"No gonna happen" << endl;
-                return;
-            }
-            Node* newNode = new Node();
-            newNode->shipPtr =shipPtr;
-            newNode->next = top;
-            top = newNode;
-            size++;
-            //cout << "checking " << size  << endl;
-            }
-
-        Ship* pop(ofstream& mof){
-            if(isEmpty()){
-                mof<<"Stack empty dumbass your code suck" << endl;
+Ship* Ship::updateShip(const char& Team_name,const string& Ship_Type,const string& Ship_name,const int& posX,const int& posY,Field& field,LinkedList& ships,Queue& DESships,Stack& uS, ofstream& mof){
+            if(Ship_Type=="Destroyer"){
+                return new Destroyer(Team_name,Ship_name,posX,posY,field,ships,DESships,uS, mof);
+            }else if(Ship_Type=="Corvette"){
+                return new Corvette(Team_name,Ship_name,posX,posY,field,ships,DESships,uS, mof);
+            }else if(Ship_Type=="SuperShip"){
+                return new SuperShip(Team_name,Ship_name,posX,posY,field,ships,DESships,uS, mof);
+            }else{
                 return nullptr;
             }
-            Node*temp = top;
-            Ship* shipPtr = top ->shipPtr;
-            top = top->next;
-            delete temp;
-            size--;
-            //cout << "check2 " << size  << endl;
-            return shipPtr;
         }
-
-
-        ~Stack(){
-            while(!isEmpty()){
-                pop();
-            }
-        }
-};
-
-//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-class Queue{
-    private:
-        Node* front;
-        Node* rear;
-    public:
-        Queue() : front(nullptr), rear(nullptr){} //do nothing
-
-        ~Queue(){
-            clear();
-        }
-
-        Queue(const Queue& other) : front(nullptr), rear(nullptr) {
-            Node* temp = other.front;
-            while (temp != nullptr) {
-                enqueue(temp->shipPtr);
-                temp = temp->next;
-            }
-        }
-
-        Queue& operator=(const Queue& other) {
-            if (this == &other) return *this;
-            clear();
-            Node* temp = other.front;
-            while (temp != nullptr) {
-                enqueue(temp->shipPtr);
-                temp = temp->next;
-            }
-            return *this;
-        }
-
-        Queue(Queue&& other) noexcept : front(other.front), rear(other.rear) {
-            other.front = nullptr;
-            other.rear = nullptr;
-        }
-
-        Queue& operator=(Queue&& other) noexcept {
-            if (this == &other) return *this;
-            clear();
-            front = other.front;
-            rear = other.rear;
-            other.front = nullptr;
-            other.rear = nullptr;
-            return *this;
-        }
-
-        void enqueue(Ship* shipPtr){
-            Node * newNode = new Node();
-            newNode -> shipPtr = shipPtr; 
-            newNode -> next = nullptr;
-
-            if(front == nullptr){
-                front = newNode;
-                rear = newNode;
-            }else{
-                rear -> next = newNode;
-                rear = newNode;
-            }
-        }
-
-        void dequeue(Field& field,LinkedList& ships, ofstream& mof){
-            if(front == nullptr){
-                return;
-            }
-            Node* temp = front;
-            int newX, newY;
-            do {
-                newX = rand() % 10;
-                newY = rand() % 10;
-            } while (field.checkCell(newY, newX) != "0");
-            temp->shipPtr->posX = newX;
-            temp->shipPtr->posY = newY;
-            mof << temp->shipPtr->Ship_name <<" return to battlefield at ("<<newX <<","<<newY<<") !"<<endl;
-            field.updateField(temp->shipPtr, newY, newX);
-            ships.append(temp->shipPtr);
-            front = front -> next;
-            delete temp;
-        }
-
-        bool WaitTeam(char teamName){
-            Node* temp = front;
-            while (temp != nullptr) {
-                if (temp->shipPtr->Team_name == teamName) {
-                    return true; 
-                }
-                temp = temp->next;
-            }
-            return false;
-        }
-
-    private:
-        void clear() {
-            Node* temp;
-            while(front!=nullptr){
-                temp = front;
-                front = front -> next;
-                delete temp;
-            }
-            rear = nullptr;
-        }
-};
 
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-class Battleship : public SeeingRobot,public MovingShip,public ShootingShip{
-    public:
-        Battleship(char Team_name,string Ship_name,Field& field,LinkedList& ships,Queue& DESships,Stack& uS, ofstream& mof){
+Battleship::Battleship(char Team_name,string Ship_name,Field& field,LinkedList& ships,Queue& DESships,Stack& uS, ofstream& mof){
             //srand(time(0));
             this->Team_name = Team_name;
             this->Ship_name = Ship_name;
@@ -485,7 +51,7 @@ class Battleship : public SeeingRobot,public MovingShip,public ShootingShip{
             }
         }
 
-        void look(Field& field,LinkedList& ships, ofstream& mof) override{
+void Battleship::look(Field& field,LinkedList& ships, ofstream& mof){
             int startingX=0,endingX=0,startingY=0,endingY=0;
             int NewP=0;
             //remember row , column left -> down! so y is row and x is column
@@ -596,7 +162,7 @@ class Battleship : public SeeingRobot,public MovingShip,public ShootingShip{
                 CanMove=false;
             }
         }
-        void move(Field& field,LinkedList& ships, ofstream& mof) override{
+void Battleship::move(Field& field,LinkedList& ships, ofstream& mof){
             if(CanMove){
                 mof<<this->Ship_name<<" move to (" << this->nextX << "," << this->nextY <<")"<< endl; 
                 field.updateField(this,this->nextY,this->nextX);
@@ -610,7 +176,7 @@ class Battleship : public SeeingRobot,public MovingShip,public ShootingShip{
                 mof<<this->Ship_name<<" currently can't move." <<endl;;
             }
         }
-        void shoot(Field& field,LinkedList& ships,Queue& DESships,Stack& uS, ofstream& mof) override{
+void Battleship::shoot(Field& field,LinkedList& ships,Queue& DESships,Stack& uS, ofstream& mof){
             int x=0,y=0;
             int shots=2;
             int max_range = 5;
@@ -667,18 +233,18 @@ class Battleship : public SeeingRobot,public MovingShip,public ShootingShip{
                 }  
             }
         }
-        void actions(Field& field,LinkedList& ships,Queue& DESships,Stack& uS, ofstream& mof) override{
+void Battleship::actions(Field& field,LinkedList& ships,Queue& DESships,Stack& uS, ofstream& mof){
             mof<<this->Ship_type<<" "<<this->Ship_name<<" from Team " << this->Team_name <<" at (" << this->posX<<","<<this->posY<<") start actions:"<< endl;
             look(field,ships, mof);
             move(field,ships, mof);  
             shoot(field,ships,DESships,uS, mof);
             mof<<endl;
         }
-};
 
-class Cruiser : public SeeingRobot,public RamShip{ //3 to Ds
-    public:
-        Cruiser(char Team_name,string Ship_name,Field& field,LinkedList& ships,Queue& DESships,Stack& uS, ofstream& mof){
+
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Cruiser::Cruiser(char Team_name,string Ship_name,Field& field,LinkedList& ships,Queue& DESships,Stack& uS, ofstream& mof){
             this->Team_name = Team_name;
             this->Ship_name = Ship_name;
             this->Ship_type = "Cruiser";
@@ -692,7 +258,7 @@ class Cruiser : public SeeingRobot,public RamShip{ //3 to Ds
             }
         }
    
-        void look(Field& field,LinkedList& ships, ofstream& mof) override{
+void Cruiser::look(Field& field,LinkedList& ships, ofstream& mof){
             int startingX=0,endingX=0,startingY=0,endingY=0;
             int NewP=0;
             //remember row , column left -> down! so y is row and x is column
@@ -809,7 +375,7 @@ class Cruiser : public SeeingRobot,public RamShip{ //3 to Ds
                 CanMove=true;
             }
         }
-        void step(Field& field,LinkedList& ships,Queue& DESships,Stack& uS, ofstream& mof) override{
+void Cruiser::step(Field& field,LinkedList& ships,Queue& DESships,Stack& uS, ofstream& mof){
             if(CanMove){
                 if(ships.findShipTeam(this->nextX,this->nextY)==this->Team_name && field.checkCell(this->nextY,this->nextX)!="0"){
                     mof<<this->Ship_name<<" step on friendly ship: "<<ships.findShipname(this->nextX,this->nextY)<< "(" << this->nextX << "," << this->nextY <<")"<< endl; 
@@ -914,18 +480,16 @@ class Cruiser : public SeeingRobot,public RamShip{ //3 to Ds
                 mof<<this->Ship_type<<" is bugging" << endl;
             }
         }
-        void actions(Field& field,LinkedList& ships,Queue& DESships,Stack& uS, ofstream& mof) override{
+void Cruiser::actions(Field& field,LinkedList& ships,Queue& DESships,Stack& uS, ofstream& mof){
             mof<<this->Ship_type<<" "<<this->Ship_name<<" from Team " << this->Team_name <<" at (" << this->posX<<","<<this->posY<<") start actions:"<< endl;
             look(field,ships, mof);
             step(field,ships,DESships,uS, mof);
             mof<<endl;
         }
-        
-};
 
-class Destroyer : public SeeingRobot,public ShootingShip,public RamShip{ //3 to ss
-    public:
-        Destroyer(char Team_name,string Ship_name,int posX,int posY,Field& field,LinkedList& ships,Queue& DESships,Stack& uS, ofstream& mof){
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Destroyer::Destroyer(char Team_name,string Ship_name,int posX,int posY,Field& field,LinkedList& ships,Queue& DESships,Stack& uS, ofstream& mof){
             this->Ship_lives=3;
             this->Team_name = Team_name;
             this->Ship_name = Ship_name;
@@ -933,11 +497,11 @@ class Destroyer : public SeeingRobot,public ShootingShip,public RamShip{ //3 to 
             this->posX = posX;
             this->posY = posY;
         }
-        void updateF(Field& field){
+void Destroyer::updateF(Field& field){
             field.updateField(this,this->posY,this->posX);
         }
 
-        void look(Field& field,LinkedList& ships, ofstream& mof) override{
+void Destroyer::look(Field& field,LinkedList& ships, ofstream& mof) {
             int startingX=0,endingX=0,startingY=0,endingY=0;
             int NewP=0;
             //remember row , column left -> down! so y is row and x is column
@@ -1054,7 +618,7 @@ class Destroyer : public SeeingRobot,public ShootingShip,public RamShip{ //3 to 
                 CanMove=true;
             }
         }
-        void step(Field& field,LinkedList& ships,Queue& DESships,Stack& uS, ofstream& mof) override{
+        void Destroyer::step(Field& field,LinkedList& ships,Queue& DESships,Stack& uS, ofstream& mof) {
             if(CanMove){
                 if(ships.findShipTeam(this->nextX,this->nextY)==this->Team_name && field.checkCell(this->nextY,this->nextX)!="0"){
                     mof<<this->Ship_name<<" step on friendly ship: "<<ships.findShipname(this->nextX,this->nextY)<< "(" << this->nextX << "," << this->nextY <<")"<< endl; 
@@ -1158,7 +722,7 @@ class Destroyer : public SeeingRobot,public ShootingShip,public RamShip{ //3 to 
                 mof<<this->Ship_type<<" is bugging" << endl;
             }
         }
-        void shoot(Field& field,LinkedList& ships,Queue& DESships,Stack& uS, ofstream& mof) override{
+void Destroyer::shoot(Field& field,LinkedList& ships,Queue& DESships,Stack& uS, ofstream& mof) {
             int x=0,y=0;
             int shots=2;
             int max_range = 5;
@@ -1212,7 +776,8 @@ class Destroyer : public SeeingRobot,public ShootingShip,public RamShip{ //3 to 
                 }  
             }
         }
-        void actions(Field& field,LinkedList& ships,Queue& DESships,Stack& uS, ofstream& mof) override{
+
+void Destroyer::actions(Field& field,LinkedList& ships,Queue& DESships,Stack& uS, ofstream& mof) {
             if(!this->ShootPosition){
                 updateF(field);
                 this->ShootPosition=true;
@@ -1226,11 +791,11 @@ class Destroyer : public SeeingRobot,public ShootingShip,public RamShip{ //3 to 
             shoot(field,ships,DESships,uS, mof);
             mof<<endl;
         }
-};
 
-class Frigate : public ShootingShip{ //cannot move,look,clockwise shoot,3 to corvette
-    public:
-        Frigate(char Team_name,string Ship_name,Field& field,LinkedList& ships,Queue& DESships,Stack& uS, ofstream& mof){
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+Frigate::Frigate(char Team_name,string Ship_name,Field& field,LinkedList& ships,Queue& DESships,Stack& uS, ofstream& mof){
             this->Team_name = Team_name;
             this->Ship_name = Ship_name;
             this->Ship_type = "Frigate";
@@ -1244,7 +809,7 @@ class Frigate : public ShootingShip{ //cannot move,look,clockwise shoot,3 to cor
             }
         }
 
-        void shoot(Field& field,LinkedList& ships,Queue& DESships,Stack& uS, ofstream& mof) override{ //sorry but i refuse
+void Frigate::shoot(Field& field,LinkedList& ships,Queue& DESships,Stack& uS, ofstream& mof) { //sorry but i refuse
             if(this->record>7){
                 this->record=0;
             }
@@ -1317,16 +882,15 @@ class Frigate : public ShootingShip{ //cannot move,look,clockwise shoot,3 to cor
                 }
             }
 
-        void actions(Field& field,LinkedList& ships,Queue& DESships,Stack& uS, ofstream& mof) override{
+void Frigate::actions(Field& field,LinkedList& ships,Queue& DESships,Stack& uS, ofstream& mof) {
             mof << this->Ship_type << " " << this->Ship_name << " from Team " << this->Team_name << " at (" << this->posX << "," << this->posY << ") start actions:" << endl;
             shoot(field, ships, DESships,uS, mof);
             mof<<endl;
         }
-};
 
-class Corvette : public ShootingShip{ //shoot surronding randomly
-public:
-    Corvette(char Team_name,string Ship_name,int posX,int posY,Field& field,LinkedList& ships,Queue& DESships,Stack& uS, ofstream& mof){
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Corvette::Corvette(char Team_name,string Ship_name,int posX,int posY,Field& field,LinkedList& ships,Queue& DESships,Stack& uS, ofstream& mof){
             this->Team_name = Team_name;
             this->Ship_name = Ship_name;
             this->Ship_type = "Corvette";
@@ -1335,11 +899,11 @@ public:
             this->posY = posY;
     }
 
-    void updateF(Field& field){
+void Corvette::updateF(Field& field){
         field.updateField(this,this->posY,this->posX);
         }
 
-    void shoot(Field& field,LinkedList& ships,Queue& DESships,Stack& uS, ofstream& mof) override{
+void Corvette::shoot(Field& field,LinkedList& ships,Queue& DESships,Stack& uS, ofstream& mof){
             int x=0,y=0;
             int shots=2;
             int max_X = 1;
@@ -1379,7 +943,7 @@ public:
                 }  
             }
     }
-    void actions(Field& field,LinkedList& ships,Queue& DESships,Stack& uS, ofstream& mof) override{
+void Corvette::actions(Field& field,LinkedList& ships,Queue& DESships,Stack& uS, ofstream& mof) {
         if(!this->ShootPosition){
                 updateF(field);
                 this->ShootPosition=true;
@@ -1387,11 +951,10 @@ public:
         mof << this->Ship_type << " " << this->Ship_name << " from Team " << this->Team_name << " at (" << this->posX << "," << this->posY << ") start actions:" << endl;
         shoot(field, ships, DESships,uS, mof);
     }
-};
 
-class Amphibious: public SeeingRobot,public MovingShip,public ShootingShip{ //move to sea or islands,like bs,4 to ss
-public:
-    Amphibious(char Team_name,string Ship_name,Field& field,LinkedList& ships,Queue& DESships,Stack& uS, ofstream& mof){
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Amphibious::Amphibious(char Team_name,string Ship_name,Field& field,LinkedList& ships,Queue& DESships,Stack& uS, ofstream& mof){
             this->Team_name = Team_name;
             this->Ship_name = Ship_name;
             this->Ship_type = "Amphibious";
@@ -1404,7 +967,7 @@ public:
                 }
             }
     }
-    void look(Field& field,LinkedList& ships, ofstream& mof) override{
+void Amphibious::look(Field& field,LinkedList& ships, ofstream& mof){
         int startingX=0,endingX=0,startingY=0,endingY=0;
             int NewP=0;
             //remember row , column left -> down! so y is row and x is column
@@ -1515,7 +1078,7 @@ public:
                 CanMove=false;
             }
     }
-    void move(Field& field,LinkedList& ships, ofstream& mof) override{
+void Amphibious::move(Field& field,LinkedList& ships, ofstream& mof){
         if(CanMove){
                 mof<<this->Ship_name<<" move to (" << this->nextX << "," << this->nextY <<")"<< endl; 
                 field.updateField(this,this->nextY,this->nextX);
@@ -1529,7 +1092,8 @@ public:
                 mof<<this->Ship_name<<" currently can't move." << endl;;
             }
     }
-    void shoot(Field& field,LinkedList& ships,Queue& DESships,Stack& uS, ofstream& mof) override{
+
+void Amphibious::shoot(Field& field,LinkedList& ships,Queue& DESships,Stack& uS, ofstream& mof) {
         int x=0,y=0;
             int shots=2;
             int max_range = 5;
@@ -1586,18 +1150,17 @@ public:
                 }  
             }
     }
-    void actions(Field& field,LinkedList& ships,Queue& DESships,Stack& uS, ofstream& mof) override{
+
+void Amphibious::actions(Field& field,LinkedList& ships,Queue& DESships,Stack& uS, ofstream& mof) {
             mof<<this->Ship_type<<" "<<this->Ship_name<<" from Team " << this->Team_name <<" at (" << this->posX<<","<<this->posY<<") start actions:"<< endl;
             look(field,ships, mof);
             move(field,ships, mof);
             shoot(field,ships,DESships,uS, mof);
             mof<<endl;
         }
-};
 
-class SuperShip:public SeeingRobot,public RamShip,public ShootingShip{ //shoot 3
-public:
-    SuperShip(char Team_name,string Ship_name,int posX,int posY,Field& field,LinkedList& ships,Queue& DESships,Stack& uS, ofstream& mof){
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+SuperShip::SuperShip(char Team_name,string Ship_name,int posX,int posY,Field& field,LinkedList& ships,Queue& DESships,Stack& uS, ofstream& mof){
             this->Team_name = Team_name;
             this->Ship_name = Ship_name;
             this->Ship_lives=3;
@@ -1606,10 +1169,11 @@ public:
             this->posY = posY;
     }
 
-    void updateF(Field& field){
+void SuperShip::updateF(Field& field){
         field.updateField(this,this->posY,this->posX);
     }
-    void look(Field& field,LinkedList& ships, ofstream& mof) override{
+
+void SuperShip::look(Field& field,LinkedList& ships, ofstream& mof){
         int startingX=0,endingX=0,startingY=0,endingY=0;
             int NewP=0;
             //remember row , column left -> down! so y is row and x is column
@@ -1726,7 +1290,8 @@ public:
                 CanMove=true;
             }
     }
-    void step(Field& field,LinkedList& ships,Queue& DESships,Stack& uS, ofstream& mof) override{
+
+void SuperShip::step(Field& field,LinkedList& ships,Queue& DESships,Stack& uS, ofstream& mof){
         if(CanMove){
                 if(ships.findShipTeam(this->nextX,this->nextY)==this->Team_name && field.checkCell(this->nextY,this->nextX)!="0"){
                     mof<<this->Ship_name<<" step on friendly ship: "<<ships.findShipname(this->nextX,this->nextY)<< "(" << this->nextX << "," << this->nextY <<")"<< endl; 
@@ -1799,7 +1364,8 @@ public:
                 mof<<this->Ship_type<<" is bugging" << endl;
             }
     }
-    void shoot(Field& field,LinkedList& ships,Queue& DESships,Stack& uS, ofstream& mof) override{
+    
+void SuperShip::shoot(Field& field,LinkedList& ships,Queue& DESships,Stack& uS, ofstream& mof) {
         int x=0,y=0;
             int shots=3;
             int max_range = 5;
@@ -1839,7 +1405,8 @@ public:
                 }  
             }
     }
-    void actions(Field& field,LinkedList& ships,Queue& DESships,Stack& uS, ofstream& mof) override{
+
+void SuperShip::actions(Field& field,LinkedList& ships,Queue& DESships,Stack& uS, ofstream& mof) {
             if(!this->ShootPosition){
                 updateF(field);
                 this->ShootPosition=true;
@@ -1853,14 +1420,11 @@ public:
             shoot(field,ships,DESships,uS, mof);
             mof<<endl;
         }
-};
 
-class SniperShip : public SeeingRobot, public ShootingShip {
-public:
-    bool targetLocked;
-    int targetX, targetY;
 
-    SniperShip(char Team_name, string Ship_name,Field& field, LinkedList& ships, Queue& DESships,Stack& uS, ofstream& mof) {
+//--------------------------------------------------------------------------------------------------------------------------------------------
+
+SniperShip::SniperShip(char Team_name, string Ship_name,Field& field, LinkedList& ships, Queue& DESships,Stack& uS, ofstream& mof) {
         this->Team_name = Team_name;
         this->Ship_name = Ship_name;
         this->Ship_type = "SniperShip";
@@ -1874,7 +1438,7 @@ public:
                 }
     }
 
-    void look(Field& field, LinkedList& ships, ofstream& mof) override {
+    void SniperShip::look(Field& field, LinkedList& ships, ofstream& mof) {
         if (!targetLocked) {
             for (int row = 0; row < field.height; ++row) {
                 for (int col = 0; col < field.width; ++col) {
@@ -1890,7 +1454,7 @@ public:
         }
     }
 
-    void shoot(Field& field, LinkedList& ships, Queue& DESships,Stack& uS, ofstream& mof) override {
+    void SniperShip::shoot(Field& field, LinkedList& ships, Queue& DESships,Stack& uS, ofstream& mof) {
             if (targetLocked) {
                 string targetName = ships.findShipname(targetX, targetY);
                 if (targetName != "nothing" && ships.findShipTeam(targetX, targetY) != this->Team_name) {
@@ -1917,7 +1481,7 @@ public:
             }
     }
 
-    void actions(Field& field, LinkedList& ships, Queue& DESships,Stack& uS, ofstream& mof) override {
+    void SniperShip::actions(Field& field, LinkedList& ships, Queue& DESships,Stack& uS, ofstream& mof)  {
         if(this->record%2!=0 || this->record==0){
             mof << this->Ship_type << " " << this->Ship_name << " from Team " << this->Team_name << " at (" << this->posX << "," << this->posY << ") start actions:" << endl;
             this->record++;
@@ -1931,159 +1495,3 @@ public:
         }
             mof << endl;
     }
-};
-
-//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-Ship* Ship::createShip(const char& Team_name,const string& Ship_Type,const string& Ship_name,Field& field,LinkedList& ships,Queue& DESships,Stack& uS, ofstream& mof){
-            if(Ship_Type=="Battleship"){
-                return new Battleship(Team_name,Ship_name,field,ships,DESships,uS, mof);
-            }else if(Ship_Type=="Cruiser"){
-                return new Cruiser(Team_name,Ship_name,field,ships,DESships,uS, mof);
-            }else if(Ship_Type=="Frigate"){
-                return new Frigate(Team_name,Ship_name,field,ships,DESships,uS, mof);
-            }else if(Ship_Type=="Amphibious"){
-                return new Amphibious(Team_name,Ship_name,field,ships,DESships,uS, mof);
-            }else if(Ship_Type=="SniperShip"){
-                return new SniperShip(Team_name,Ship_name,field,ships,DESships,uS, mof);
-            }else{
-                return nullptr;
-            }
-        }
-
-Ship* Ship::updateShip(const char& Team_name,const string& Ship_Type,const string& Ship_name,const int& posX,const int& posY,Field& field,LinkedList& ships,Queue& DESships,Stack& uS, ofstream& mof){
-            if(Ship_Type=="Destroyer"){
-                return new Destroyer(Team_name,Ship_name,posX,posY,field,ships,DESships,uS, mof);
-            }else if(Ship_Type=="Corvette"){
-                return new Corvette(Team_name,Ship_name,posX,posY,field,ships,DESships,uS, mof);
-            }else if(Ship_Type=="SuperShip"){
-                return new SuperShip(Team_name,Ship_name,posX,posY,field,ships,DESships,uS, mof);
-            }else{
-                return nullptr;
-            }
-        }
-
-//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-class Simulation{
-    private:
-        string ignore_line, Ship_Type, Ship_symbol, Ship_Name;
-        char Team_Name;
-        int ships_count_in_Team, ship_num;
-    public:
-        int iterations;
-        Queue DESships;
-        Field field;
-        LinkedList ships;
-        Stack uS,uS2;
-        ofstream of;
-        ofstream mof;
-        
-        Simulation() : mof("out1put1.txt") {
-            ifstream file("game.txt");
-            if (!file) {
-                mof << "File not found" << endl;
-                exit(1);
-            }
-            file >> ignore_line >> iterations;
-            file >> ignore_line >> field.width;
-            file >> ignore_line >> field.height;
-            field.initialize("game.txt", mof);
-            while (ignore_line[0] != '0') {
-                file >> ignore_line >> Team_Name >> ships_count_in_Team;
-                for (int i = 0; i < ships_count_in_Team; ++i) {
-                    file >> Ship_Type >> Ship_symbol >> ship_num;
-                    for (int j = 0; j < ship_num; ++j) {
-                        Ship* ship = Ship::createShip(Team_Name, Ship_Type, Ship_Name = Ship_symbol + to_string(j + 1),field,ships,DESships,uS, mof);
-                        if (ship) {
-                            ships.append(ship);
-                        }
-                    }
-                }
-            }
-            Ship* amphibious1 = Ship::createShip ('B', "Amphibious", ";1", field, ships, DESships,uS, mof);
-            Ship* amphibious2 =  Ship::createShip('B', "Amphibious", ";2",  field, ships, DESships,uS, mof);
-            Ship* Sniper =  Ship::createShip('A', "SniperShip", "~S",  field, ships, DESships,uS, mof);
-            ships.append(amphibious1);
-            ships.append(amphibious2);
-            ships.append(Sniper);
-            file.close();
-            StartGame();
-        }
-
-        void StartGame(){
-                bool upgrade=false;
-                mof << "Initialize:" << endl;
-                field.printField(mof);
-                for(int x=1;x<=iterations;x++){
-                    mof << "Turn " << x << endl;
-                    of << "Turn " << x << endl;
-                    for(int j=0;j<2;j++){
-                        DESships.dequeue(field,ships, mof); 
-                    }
-                    mof<<endl;
-                    Node* temp = ships.head;
-                    Node* temp2;
-                    while(temp != nullptr){
-                        temp -> shipPtr -> actions(field,ships,DESships,uS, mof);
-                        if(temp->shipPtr->Ship_upgrade==true){
-                            uS2.push(temp->shipPtr, mof);
-    
-                            //ships.deleteNode(temp->shipPtr);
-                            upgrade=true;
-        
-                        }
-                        temp = temp -> next;
-                    }
-
-                    if(upgrade==true){
-                        for(int x=0;x<5;x++){
-                            if(!uS2.isEmpty()){
-                                Ship* deleteShip = uS2.pop(mof); //fucker this is so weird i need to create a pointer and the function will work
-                                ships.deleteNode(deleteShip);
-                                }
-                            if(!uS.isEmpty()){
-                                Ship* addShip = uS.pop(mof);
-                                ships.append(addShip);
-                            }
-                        }
-                        upgrade=false;
-                    }
-                    field.printField(mof);
-                    
-                    if((ships.remainTeam('A')==false && DESships.WaitTeam('A') == false)|| (DESships.WaitTeam('B') == false && ships.remainTeam('B')==false)){
-                        if(ships.remainTeam('A')==false){
-                            mof<<endl;
-                            of<<endl;
-                            mof<<"Team B win as Team A annihilated!" << endl;
-                            of<<"Team B win as Team A annihilated!" << endl;
-
-                        }else if(ships.remainTeam('B')==false){
-                            mof<<endl;
-                            of<<endl;
-                            mof<<"Team A win as Team B annihilated!" << endl;
-                            of<<"Team A win as Team B annihilated!" << endl;
-                        }
-                        break;
-                    }
-                    if(x==iterations){
-                    mof<<"Simulation end with time up." << endl;
-                    of<<"Simulation end with time up." << endl;
-                    break;
-                    }
-                }
-                mof<<endl;
-        }
-
-        ~Simulation() {
-            ships.clear();
-        }
-};
-
-
-
-int main(){
-    srand(time(0));
-    Simulation sim;
-    return 0;
-}

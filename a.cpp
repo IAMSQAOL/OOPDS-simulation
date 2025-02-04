@@ -9,6 +9,8 @@ class Field;
 class LinkedList;
 class Queue;
 class Stack;
+
+
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 class Ship{
     public:
@@ -24,7 +26,6 @@ class Ship{
         int targetX =-1;
         int targetY=-1;
         bool Ship_die = false;
-        
 
         Ship(){}
         virtual ~Ship(){}
@@ -40,7 +41,7 @@ class Field{
         string ignore_line;
         string field[10][10];
         string backupfield[10][10];
-        Field() : width(0), height(0), start_readFile(false), rowCount(0){}
+        Field() : width(0), height(0), start_readFile(false), rowCount(0) {}
 
         void initialize(const string& filename) {
             ifstream file(filename);
@@ -296,7 +297,7 @@ class LinkedList{
 
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-class Stack{
+class Stack{ // we should really just stay using queue
     private:
         struct Node{
             Ship* shipPtr;
@@ -1961,9 +1962,7 @@ class Simulation{
         Field field;
         LinkedList ships;
         Stack uS,uS2;
-        ofstream of;
-        
-        Simulation(){
+        Simulation() {
             ifstream file("game.txt");
             if (!file) {
                 cout << "File not found" << endl;
@@ -2001,7 +2000,6 @@ class Simulation{
                 field.printField();
                 for(int x=1;x<=iterations;x++){
                     cout << "Turn " << x << endl;
-                    of << "Turn " << x << endl;
                     for(int j=0;j<2;j++){
                         DESships.dequeue(field,ships); 
                     }
@@ -2038,21 +2036,15 @@ class Simulation{
                     if((ships.remainTeam('A')==false && DESships.WaitTeam('A') == false)|| (DESships.WaitTeam('B') == false && ships.remainTeam('B')==false)){
                         if(ships.remainTeam('A')==false){
                             cout<<endl;
-                            of<<endl;
                             cout<<"Team B win as Team A annihilated!" << endl;
-                            of<<"Team B win as Team A annihilated!" << endl;
-
                         }else if(ships.remainTeam('B')==false){
                             cout<<endl;
-                            of<<endl;
                             cout<<"Team A win as Team B annihilated!" << endl;
-                            of<<"Team A win as Team B annihilated!" << endl;
                         }
                         break;
                     }
                     if(x==iterations){
                     cout<<"Simulation end with time up." << endl;
-                    of<<"Simulation end with time up." << endl;
                     break;
                     }
                 }
