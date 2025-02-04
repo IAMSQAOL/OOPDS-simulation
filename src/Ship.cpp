@@ -1,8 +1,8 @@
-#include "Ship.h"
-#include "LinkedList.h"
-#include "Queue.h"
-#include "Field.h"
-#include "Stack.h"
+#include "../include/Ship.h"
+#include "../include/LinkedList.h"
+#include "../include/Queue.h"
+#include "../include/Field.h"
+#include "../include/Stack.h"
 #include <fstream>
 using namespace std;
 

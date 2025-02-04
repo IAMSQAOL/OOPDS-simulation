@@ -1,6 +1,6 @@
-#include "LinkedList.h"
+#include "../include/LinkedList.h"
 #include <iostream>
-#include "Ship.h"  // Ensure Ship is included
+#include "../include/Ship.h"  // Ensure Ship is included
 using namespace std;
 
 LinkedList::LinkedList() : head(nullptr){};

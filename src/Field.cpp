@@ -1,5 +1,5 @@
-#include "Field.h"
-#include "Simulation.h"
+#include "../include/Field.h"
+#include "../include/Simulation.h"
 
 Field::Field(){};
 void Field::initialize(const string& filename, ofstream& mof) {

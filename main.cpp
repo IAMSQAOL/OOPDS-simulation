@@ -1,4 +1,5 @@
-#include "Simulation.h"
+#include <iostream>
+#include "./include/Simulation.h"
 
 int main(){
     srand(time(0));

@@ -1,4 +1,4 @@
-#include "Simulation.h"
+#include "../include/Simulation.h"
 using namespace std;
 
 Simulation::Simulation() : mof("out1put1.txt") {
