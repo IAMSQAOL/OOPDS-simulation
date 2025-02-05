@@ -1,11 +1,10 @@
 #ifndef NODE_H
 #define NODE_H
+#include "SHIP.H"
 
-class Ship;  // Forward declaration
-
-struct Node {
+struct Node{ 
     Ship* shipPtr;
     Node* next;
 };
 
-#endif // NODE_H
+#endif

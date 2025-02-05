@@ -1,8 +1,10 @@
-#include "../include/Stack.h"
+#include "STACK.H"
+#include <iostream>
+#include "OUTPUT.H"
 
 Ship* Stack::pop(){
             if(isEmpty()){
-                cout<<"Stack empty dumbass your code suck" << endl;
+                std::cout<<"Stack empty dumbass your code suck" << std::endl;
                 return nullptr;
             }
             Node*temp = top;
@@ -13,8 +15,8 @@ Ship* Stack::pop(){
             //cout << "check2 " << size  << endl;
             return shipPtr;
         }
-        int size=0;
-        const int maxSize=5;
+
+        Stack::Stack() : top(nullptr),size(0){}
 
         bool Stack::isEmpty() const{
             return top == nullptr;
@@ -23,9 +25,9 @@ Ship* Stack::pop(){
             return size>= maxSize;
         }
 
-        void Stack::push(Ship* shipPtr, ofstream& mof){
+        void Stack::push(Ship* shipPtr){
             if(isFull()){
-                mof<<"No gonna happen" << endl;
+                mof<<"No gonna happen" << std::endl;
                 return;
             }
             Node* newNode = new Node();
@@ -35,21 +37,6 @@ Ship* Stack::pop(){
             size++;
             //cout << "checking " << size  << endl;
             }
-
-        Ship* Stack::pop(ofstream& mof){
-            if(isEmpty()){
-                mof<<"Stack empty dumbass your code suck" << endl;
-                return nullptr;
-            }
-            Node*temp = top;
-            Ship* shipPtr = top ->shipPtr;
-            top = top->next;
-            delete temp;
-            size--;
-            //cout << "check2 " << size  << endl;
-            return shipPtr;
-        }
-
 
         Stack::~Stack(){
             while(!isEmpty()){

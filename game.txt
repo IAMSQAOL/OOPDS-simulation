@@ -1,4 +1,4 @@
-iterations 100
+~iterations 100
 width 10
 height 10
 Team A 4

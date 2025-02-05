@@ -1,43 +1,14 @@
-#include "../include/Ship.h"
-#include "../include/LinkedList.h"
-#include "../include/Queue.h"
-#include "../include/Field.h"
-#include "../include/Stack.h"
-#include <fstream>
-using namespace std;
+#include "SHIP.H"
+#include "SHIP_TYPE.H"
+#include <iostream>
+#include "FIELD.H"
+#include "OUTPUT.H"
+#include "LINKEDLIST.H"
+#include "STACK.H"
+#include "QUEUE.H"
 
-Ship* Ship::createShip(const char& Team_name,const string& Ship_Type,const string& Ship_name,Field& field,LinkedList& ships,Queue& DESships,Stack& uS, ofstream& mof){
-            if(Ship_Type=="Battleship"){
-                return new Battleship(Team_name,Ship_name,field,ships,DESships,uS, mof);
-            }else if(Ship_Type=="Cruiser"){
-                return new Cruiser(Team_name,Ship_name,field,ships,DESships,uS, mof);
-            }else if(Ship_Type=="Frigate"){
-                return new Frigate(Team_name,Ship_name,field,ships,DESships,uS, mof);
-            }else if(Ship_Type=="Amphibious"){
-                return new Amphibious(Team_name,Ship_name,field,ships,DESships,uS, mof);
-            }else if(Ship_Type=="SniperShip"){
-                return new SniperShip(Team_name,Ship_name,field,ships,DESships,uS, mof);
-            }else{
-                return nullptr;
-            }
-        }
+Battleship::Battleship(char Team_name,std::string Ship_name,Field& field,LinkedList& ships,Queue& DESships,Stack& uS){
 
-Ship* Ship::updateShip(const char& Team_name,const string& Ship_Type,const string& Ship_name,const int& posX,const int& posY,Field& field,LinkedList& ships,Queue& DESships,Stack& uS, ofstream& mof){
-            if(Ship_Type=="Destroyer"){
-                return new Destroyer(Team_name,Ship_name,posX,posY,field,ships,DESships,uS, mof);
-            }else if(Ship_Type=="Corvette"){
-                return new Corvette(Team_name,Ship_name,posX,posY,field,ships,DESships,uS, mof);
-            }else if(Ship_Type=="SuperShip"){
-                return new SuperShip(Team_name,Ship_name,posX,posY,field,ships,DESships,uS, mof);
-            }else{
-                return nullptr;
-            }
-        }
-
-//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-Battleship::Battleship(char Team_name,string Ship_name,Field& field,LinkedList& ships,Queue& DESships,Stack& uS, ofstream& mof){
-            //srand(time(0));
             this->Team_name = Team_name;
             this->Ship_name = Ship_name;
             this->Ship_type = "Battleship";
@@ -51,85 +22,85 @@ Battleship::Battleship(char Team_name,string Ship_name,Field& field,LinkedList& 
             }
         }
 
-void Battleship::look(Field& field,LinkedList& ships, ofstream& mof){
+        void Battleship::look(Field& field,LinkedList& ships){
             int startingX=0,endingX=0,startingY=0,endingY=0;
             int NewP=0;
             //remember row , column left -> down! so y is row and x is column
             //for findShipname function,provide x first then y
             if( this->posX-1<0 || this->posY-1<0 || this->posX+2>9 || this->posY+2>9){
                 if(this->posX-1<0 && this->posY-1<0){ //top left
-                    //cout <<"Enter top left" << endl;
+                    //cout <<"Enter top left" << std::std::endl;
                     startingX=this->posX;
                     startingY=this->posY;
                     endingX=this->posX+2;
                     endingY=this->posY+2;
                 }else if(this->posX+2>9 && this->posY-1<0){ //top right
-                    //cout <<"Enter top right" << endl;
+                    //cout <<"Enter top right" << std::std::endl;
                     startingX=this->posX-1;
                     startingY=this->posY;
                     endingX=this->posX+1;
                     endingY=this->posY+2; 
                 }else if(this->posX-1<0 && this->posY+2>9){
-                    //cout <<"Enter bottom left" << endl;
+                    //cout <<"Enter bottom left" << std::std::endl;
                     startingX=this->posX;
                     startingY=this->posY-1;
                     endingX=this->posX+2;
                     endingY=this->posY+1;    
                 }else if(this->posX+2>9 && posY+2>9){
-                    //cout <<"Enter bottom right" << endl;
+                    //cout <<"Enter bottom right" << std::std::endl;
                     startingX=this->posX-1;
                     startingY=this->posY-1;
                     endingX=this->posX+1;
                     endingY=this->posY+1;  
                 }else if(this->posX-1<0){
-                    //cout <<"Enter left" << endl;
+                    //cout <<"Enter left" << std::std::endl;
                     startingX=this->posX;
                     startingY=this->posY-1;
                     endingX=this->posX+2;
                     endingY=this->posY+2;  
                 }else if(this->posY-1<0){
-                    //cout <<"Enter top" << endl;
+                    //cout <<"Enter top" << std::std::endl;
                     startingX=this->posX-1;
                     startingY=this->posY;
                     endingX=this->posX+2;
                     endingY=this->posY+2;  
                 }else if(this->posX+2>9){
-                   //cout <<"Enter right" << endl;
+                   //cout <<"Enter right" << std::std::endl;
                     startingX=this->posX-1;
                     startingY=this->posY-1;
                     endingX=this->posX+1;
                     endingY=this->posY+2;  
                 }else if(this->posY+2>9){
-                    //cout <<"Enter down" << endl;
+                    //cout <<"Enter down" << std::std::endl;
                     startingX=this->posX-1;
                     startingY=this->posY-1;
                     endingX=this->posX+1;
                     endingY=this->posY+1;  
                 }
             }else{
-                //cout<<"Enter ram" << endl;
+                //cout<<"Enter ram" << std::std::endl;
                 startingX = (this->posX)-1;
-                //cout << startingX << endl;
+                //cout << startingX << std::std::endl;
                 endingX = (this->posX)+2;
-                //cout << endingX << endl;
+                //cout << endingX << std::std::endl;
                 startingY = (this->posY)-1;
-                //cout << startingY << endl;
+                //cout << startingY << std::std::endl;
                 endingY = (this->posY+2);
-                //cout << endingY << endl;
+                //cout << endingY << std::std::endl;
             }
 
             for(int row=startingY;row<endingY;row++){
                 for(int column=startingX;column<endingX;column++){
-                    //cout <<column<<","<<row<<endl;
-                    //cout<<ships.findShipname(column,row)<<endl;
+                    //cout <<column<<","<<row<<std::std::endl;
+                    //cout<<ships.findShipname(column,row)<<std::std::endl;
                     if(field.checkCell(row,column)==ships.findShipname(column,row)&&field.checkCell(row,column)!=this->Ship_name&&ships.findShipTeam(column,row)!=this->Team_name){
-                        mof<<this->Ship_name<<" found Enemy ship: "<<ships.findShipname(column,row)<<" at (" << column <<","<<row<<")" << endl;
+                        mof<<this->Ship_name<<" found Enemy ship: "<<ships.findShipname(column,row)<<" at (" << column <<","<<row<<")" << std::endl;
                     }else if(field.checkCell(row,column)==ships.findShipname(column,row)&&field.checkCell(row,column)!=this->Ship_name&&ships.findShipTeam(column,row)==this->Team_name){
-                        mof<<this->Ship_name<<" found Freindly Ship: "<<ships.findShipname(column,row)<<" at (" << column <<","<<row<<") " << endl;
+                        mof<<this->Ship_name<<" found Freindly Ship: "<<ships.findShipname(column,row)<<" at (" << column <<","<<row<<") " << std::endl;
                     }
                     if(field.checkCell(row,column)=="0"){
                         if( row==this->posY-1 && column==this->posX || row==posY+1 && column==this->posX || column==posX+1 && row==this->posY || column==posX-1 && row==this->posY){
-                            //cout<<this->Ship_name<<" can move to "<<column<<","<<row<<endl;
+                            //cout<<this->Ship_name<<" can move to "<<column<<","<<row<<std::std::endl;
                             ++NewP;
                         }
                     }
@@ -138,7 +109,7 @@ void Battleship::look(Field& field,LinkedList& ships, ofstream& mof){
             if(NewP!=0){  //laszy ass way to decide next move :)
                 CanMove = true;
                 int decide = (rand() % NewP)+1;
-                //cout << decide << endl;
+                //cout << decide << std::std::endl;
                 int reaching=0;
                 for(int row=startingY;row<endingY;row++){
                     for(int column=startingX;column<endingX;column++){
@@ -152,7 +123,7 @@ void Battleship::look(Field& field,LinkedList& ships, ofstream& mof){
                                         //cout<<this->nextX<<" and "<<this->nextY;
                                         break;
                                     }
-                                    //cout<<reaching<<endl;
+                                    //cout<<reaching<<std::std::endl;
                                 }
                             }
                         }
@@ -162,9 +133,9 @@ void Battleship::look(Field& field,LinkedList& ships, ofstream& mof){
                 CanMove=false;
             }
         }
-void Battleship::move(Field& field,LinkedList& ships, ofstream& mof){
+        void Battleship::move(Field& field,LinkedList& ships){
             if(CanMove){
-                mof<<this->Ship_name<<" move to (" << this->nextX << "," << this->nextY <<")"<< endl; 
+                mof<<this->Ship_name<<" move to (" << this->nextX << "," << this->nextY <<")"<< std::endl; 
                 field.updateField(this,this->nextY,this->nextX);
                 field.FieldBack(this->posY,this->posX);
                 this->posX=this->nextX;
@@ -173,10 +144,10 @@ void Battleship::move(Field& field,LinkedList& ships, ofstream& mof){
                 this->nextY=-1;
                 CanMove=false;
             }else{
-                mof<<this->Ship_name<<" currently can't move." <<endl;;
+                mof<<this->Ship_name<<" currently can't move." << std::endl;;
             }
         }
-void Battleship::shoot(Field& field,LinkedList& ships,Queue& DESships,Stack& uS, ofstream& mof){
+        void Battleship::shoot(Field& field,LinkedList& ships,Queue& DESships,Stack& uS){
             int x=0,y=0;
             int shots=2;
             int max_range = 5;
@@ -190,18 +161,18 @@ void Battleship::shoot(Field& field,LinkedList& ships,Queue& DESships,Stack& uS,
                 y = (rand() % 11)-5;
                 calXY = abs(x) + abs(y);
                 }
-                //cout <<x << " "<<y<<endl;
+                //cout <<x << " "<<y<<std::endl;
                 if(ships.findShipTeam(posX+x,posY+y)!=this->Team_name || field.checkCell(posY+y,posX+x)=="0" || field.checkCell(posY+y,posX+x)=="1"){
-                    //cout <<x << " "<<y<<endl; //check not same team also check not itself hehe
+                    //cout <<x << " "<<y<<std::std::endl; //check not same team also check not itself hehe
                     if(field.checkCell(posY+y,posX+x)=="0" || field.checkCell(posY+y,posX+x)=="1" ){
-                        mof << this->Ship_name << " decide to shoot at "<<"(" <<this->posX+x<<","<<this->posY+y<<") and missed." <<endl;
+                        mof << this->Ship_name << " decide to shoot at "<<"(" <<this->posX+x<<","<<this->posY+y<<") and missed." <<std::endl;
                     }
                     if(field.checkCell(posY+y,posX+x)==ships.findShipname(posX+x,posY+y)){
-                        mof << this->Ship_name << " decide to shoot at "<<field.checkCell(posY+y,posX+x)<<"(" <<this->posX+x<<","<<this->posY+y<<") and successful!" <<endl;
+                        mof << this->Ship_name << " decide to shoot at "<<field.checkCell(posY+y,posX+x)<<"(" <<this->posX+x<<","<<this->posY+y<<") and successful!" <<std::endl;
                         if(ships.findShipPtr(posX+x,posY+y)->Ship_lives>1){
                         ships.findShipPtr(posX+x,posY+y)->Ship_lives--;
                         this->Ship_kill_count++;
-                        mof<<ships.findShipname(posX+x,posY+y)<<" remain "<<ships.findShipPtr(posX+x,posY+y)->Ship_lives <<" lives."<<endl;
+                        mof<<ships.findShipname(posX+x,posY+y)<<" remain "<<ships.findShipPtr(posX+x,posY+y)->Ship_lives <<" lives."<<std::endl;
                         if(ships.findShipPtr(posX+x,posY+y)->Ship_upgrade==false){
                         DESships.enqueue(ships.findShipPtr(posX+x,posY+y));
                         }
@@ -209,23 +180,23 @@ void Battleship::shoot(Field& field,LinkedList& ships,Queue& DESships,Stack& uS,
                         field.FieldBack(posY+y,posX+x);
                         //4 to Ds
                             if(this->Ship_kill_count==4){
-                                mof << this->Ship_name << " upgrade to Destroyer!" << endl;
-                                Ship* ship=updateShip(this->Team_name,"Destroyer",this->Ship_name,this->posX,this->posY,field,ships,DESships,uS, mof);
+                                mof << this->Ship_name << " upgrade to Destroyer!" << std::endl;
+                                Ship* ship=updateShip(this->Team_name,"Destroyer",this->Ship_name,this->posX,this->posY,field,ships,DESships,uS);
                                 this->Ship_upgrade=true;
-                                uS.push(ship, mof);
+                                uS.push(ship);
                                 break;
-                                //(const char& Team_name,const string& Ship_Type,const string& Ship_name,const int& posX,const int& posY,Field& field,LinkedList& ships,Queue& DESships)
+                                //(const char& Team_name,const std::string& Ship_Type,const std::string& Ship_name,const int& posX,const int& posY,Field& field,LinkedList& ships,Queue& DESships)
                             }
                         }else if(ships.findShipPtr(posX+x,posY+y)->Ship_lives==1 && ships.findShipPtr(posX+x,posY+y)->Ship_die==false){
                             ships.findShipPtr(this->posX+x,this->posY+y)->Ship_die=true;
-                            mof << this->Ship_name << " eliminated "<<field.checkCell(posY+y,posX+x)<<"(" <<this->posX+x<<","<<this->posY+y<<") !" <<endl;
+                            mof << this->Ship_name << " eliminated "<<field.checkCell(posY+y,posX+x)<<"(" <<this->posX+x<<","<<this->posY+y<<") !" <<std::endl;
                             ships.deleteNode(ships.findShipPtr(posX+x,posY+y));
                             field.FieldBack(posY+y,posX+x);
                             if(this->Ship_kill_count==4){
-                                mof << this->Ship_name << " upgrade to Destroyer!" << endl;
-                                Ship* ship=updateShip(this->Team_name,"Destroyer",this->Ship_name,this->posX,this->posY,field,ships,DESships,uS, mof);
+                                mof << this->Ship_name << " upgrade to Destroyer!" << std::endl;
+                                Ship* ship=updateShip(this->Team_name,"Destroyer",this->Ship_name,this->posX,this->posY,field,ships,DESships,uS);
                                 this->Ship_upgrade=true;
-                                uS.push(ship, mof);
+                                uS.push(ship);
                                 break;
                             }  
                         }
@@ -233,18 +204,15 @@ void Battleship::shoot(Field& field,LinkedList& ships,Queue& DESships,Stack& uS,
                 }  
             }
         }
-void Battleship::actions(Field& field,LinkedList& ships,Queue& DESships,Stack& uS, ofstream& mof){
-            mof<<this->Ship_type<<" "<<this->Ship_name<<" from Team " << this->Team_name <<" at (" << this->posX<<","<<this->posY<<") start actions:"<< endl;
-            look(field,ships, mof);
-            move(field,ships, mof);  
-            shoot(field,ships,DESships,uS, mof);
-            mof<<endl;
+        void Battleship::actions(Field& field,LinkedList& ships,Queue& DESships,Stack& uS){
+            mof<<this->Ship_type<<" "<<this->Ship_name<<" from Team " << this->Team_name <<" at (" << this->posX<<","<<this->posY<<") start actions:"<< std::endl;
+            look(field,ships);
+            move(field,ships);  
+            shoot(field,ships,DESships,uS);
+            mof<<std::endl;
         }
 
-
-//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-Cruiser::Cruiser(char Team_name,string Ship_name,Field& field,LinkedList& ships,Queue& DESships,Stack& uS, ofstream& mof){
+        Cruiser::Cruiser(char Team_name,std::string Ship_name,Field& field,LinkedList& ships,Queue& DESships,Stack& uS){
             this->Team_name = Team_name;
             this->Ship_name = Ship_name;
             this->Ship_type = "Cruiser";
@@ -258,79 +226,79 @@ Cruiser::Cruiser(char Team_name,string Ship_name,Field& field,LinkedList& ships,
             }
         }
    
-void Cruiser::look(Field& field,LinkedList& ships, ofstream& mof){
+        void Cruiser::look(Field& field,LinkedList& ships){
             int startingX=0,endingX=0,startingY=0,endingY=0;
             int NewP=0;
             //remember row , column left -> down! so y is row and x is column
             //for findShipname function,provide x first then y
             if( this->posX-1<0 || this->posY-1<0 || this->posX+2>9 || this->posY+2>9){
                 if(this->posX-1<0 && this->posY-1<0){ //top left
-                    //cout <<"Enter top left" << endl;
+                    //cout <<"Enter top left" << std::endl;
                     startingX=this->posX;
                     startingY=this->posY;
                     endingX=this->posX+2;
                     endingY=this->posY+2;
                 }else if(this->posX+2>9 && this->posY-1<0){ //top right
-                    //cout <<"Enter top right" << endl;
+                    //cout <<"Enter top right" << std::endl;
                     startingX=this->posX-1;
                     startingY=this->posY;
                     endingX=this->posX+1;
                     endingY=this->posY+2; 
                 }else if(this->posX-1<0 && this->posY+2>9){
-                    //cout <<"Enter bottom left" << endl;
+                    //cout <<"Enter bottom left" << std::endl;
                     startingX=this->posX;
                     startingY=this->posY-1;
                     endingX=this->posX+2;
                     endingY=this->posY+1;    
                 }else if(this->posX+2>9 && posY+2>9){
-                    //cout <<"Enter bottom right" << endl;
+                    //cout <<"Enter bottom right" << std::endl;
                     startingX=this->posX-1;
                     startingY=this->posY-1;
                     endingX=this->posX+1;
                     endingY=this->posY+1;  
                 }else if(this->posX-1<0){
-                    //cout <<"Enter left" << endl;
+                    //cout <<"Enter left" << std::endl;
                     startingX=this->posX;
                     startingY=this->posY-1;
                     endingX=this->posX+2;
                     endingY=this->posY+2;  
                 }else if(this->posY-1<0){
-                    //cout <<"Enter top" << endl;
+                    //cout <<"Enter top" << std::endl;
                     startingX=this->posX-1;
                     startingY=this->posY;
                     endingX=this->posX+2;
                     endingY=this->posY+2;  
                 }else if(this->posX+2>9){
-                   //cout <<"Enter right" << endl;
+                   //cout <<"Enter right" << std::endl;
                     startingX=this->posX-1;
                     startingY=this->posY-1;
                     endingX=this->posX+1;
                     endingY=this->posY+2;  
                 }else if(this->posY+2>9){
-                    //cout <<"Enter down" << endl;
+                    //cout <<"Enter down" << std::endl;
                     startingX=this->posX-1;
                     startingY=this->posY-1;
                     endingX=this->posX+1;
                     endingY=this->posY+1;  
                 }
             }else{
-                //cout<<"Enter ram" << endl;
+                //cout<<"Enter ram" << std::endl;
                 startingX = (this->posX)-1;
-                //cout << startingX << endl;
+                //cout << startingX << std::endl;
                 endingX = (this->posX)+2;
-                //cout << endingX << endl;
+                //cout << endingX << std::endl;
                 startingY = (this->posY)-1;
-                //cout << startingY << endl;
+                //cout << startingY << std::endl;
                 endingY = (this->posY+2);
-                //cout << endingY << endl;
+                //cout << endingY << std::endl;
             }
 
             for(int row=startingY;row<endingY;row++){
                 for(int column=startingX;column<endingX;column++){
-                    //cout <<column<<","<<row<<endl;
-                    //cout<<ships.findShipname(column,row)<<endl;
+                    //cout <<column<<","<<row<<std::endl;
+                    //cout<<ships.findShipname(column,row)<<std::endl;
                     if(field.checkCell(row,column)==ships.findShipname(column,row)&&field.checkCell(row,column)!=this->Ship_name&&ships.findShipTeam(column,row)!=this->Team_name){
-                        mof<<this->Ship_name<<" found Enemy ship: "<<ships.findShipname(column,row)<<" at (" << column <<","<<row<<") " << endl;
+                        mof<<this->Ship_name<<" found Enemy ship: "<<ships.findShipname(column,row)<<" at (" << column <<","<<row<<") " << std::endl;
                         if( row==this->posY-1 && column==this->posX || row==posY+1 && column==this->posX || column==posX+1 && row==this->posY || column==posX-1 && row==this->posY){
                         this->nextX=column;
                         this->nextY=row;
@@ -338,11 +306,11 @@ void Cruiser::look(Field& field,LinkedList& ships, ofstream& mof){
                         break;
                         }
                     }else if(field.checkCell(row,column)==ships.findShipname(column,row)&&field.checkCell(row,column)!=this->Ship_name&&ships.findShipTeam(column,row)==this->Team_name){
-                        mof<<this->Ship_name<<" found Freindly Ship: "<<ships.findShipname(column,row)<<" at (" << column <<","<<row<<") " << endl;
+                        mof<<this->Ship_name<<" found Freindly Ship: "<<ships.findShipname(column,row)<<" at (" << column <<","<<row<<") " << std::endl;
                     }
                     if(field.checkCell(row,column)=="0" || (field.checkCell(row,column)!=this->Ship_name && ships.findShipTeam(column,row)==this->Team_name)){
                         if( row==this->posY-1 && column==this->posX || row==posY+1 && column==this->posX || column==posX+1 && row==this->posY || column==posX-1 && row==this->posY){
-                            //cout<<this->Ship_name<<" can move to "<<column<<","<<row<<endl;
+                            //cout<<this->Ship_name<<" can move to "<<column<<","<<row<<std::endl;
                             ++NewP;
                         }
                     }
@@ -351,7 +319,7 @@ void Cruiser::look(Field& field,LinkedList& ships, ofstream& mof){
             if(NewP!=0){  //laszy ass way to decide next move :)
                 CanMove = true;
                 int decide = (rand() % NewP)+1;
-                //cout << decide << endl;
+                //cout << decide << std::endl;
                 int reaching=0;
                 for(int row=startingY;row<endingY;row++){
                     for(int column=startingX;column<endingX;column++){
@@ -365,7 +333,7 @@ void Cruiser::look(Field& field,LinkedList& ships, ofstream& mof){
                                         //cout<<this->nextX<<" and "<<this->nextY;
                                         break;
                                     }
-                                    //cout<<reaching<<endl;
+                                    //cout<<reaching<<std::endl;
                                 }
                             }
                         }
@@ -375,13 +343,13 @@ void Cruiser::look(Field& field,LinkedList& ships, ofstream& mof){
                 CanMove=true;
             }
         }
-void Cruiser::step(Field& field,LinkedList& ships,Queue& DESships,Stack& uS, ofstream& mof){
+        void Cruiser::step(Field& field,LinkedList& ships,Queue& DESships,Stack& uS){
             if(CanMove){
                 if(ships.findShipTeam(this->nextX,this->nextY)==this->Team_name && field.checkCell(this->nextY,this->nextX)!="0"){
-                    mof<<this->Ship_name<<" step on friendly ship: "<<ships.findShipname(this->nextX,this->nextY)<< "(" << this->nextX << "," << this->nextY <<")"<< endl; 
+                    mof<<this->Ship_name<<" step on fristd::endly ship: "<<ships.findShipname(this->nextX,this->nextY)<< "(" << this->nextX << "," << this->nextY <<")"<< std::endl; 
                     if(ships.findShipPtr(this->nextX,this->nextY)->Ship_lives>1){
                         ships.findShipPtr(this->nextX,this->nextY)->Ship_lives--;
-                        mof<<ships.findShipname(this->nextX,this->nextY)<<" remain "<<ships.findShipPtr(this->nextX,this->nextY)->Ship_lives <<" lives."<<endl;
+                        mof<<ships.findShipname(this->nextX,this->nextY)<<" remain "<<ships.findShipPtr(this->nextX,this->nextY)->Ship_lives <<" lives."<<std::endl;
                         //field.FieldBack(this->posY,this->posX);
                         if(ships.findShipPtr(this->nextX,this->nextY)->Ship_upgrade==false){
                         DESships.enqueue(ships.findShipPtr(this->nextX,this->nextY));
@@ -396,15 +364,15 @@ void Cruiser::step(Field& field,LinkedList& ships,Queue& DESships,Stack& uS, ofs
                         CanMove=false;
                         this->Ship_kill_count++;
                             if(this->Ship_kill_count==3){
-                                mof << this->Ship_name << " upgrade to Destroyer!" << endl;
-                                Ship* ship=updateShip(this->Team_name,"Destroyer",this->Ship_name,this->posX,this->posY,field,ships,DESships,uS, mof);
+                                mof << this->Ship_name << " upgrade to Destroyer!" << std::endl;
+                                Ship* ship=updateShip(this->Team_name,"Destroyer",this->Ship_name,this->posX,this->posY,field,ships,DESships,uS);
                                 this->Ship_upgrade=true;
-                                uS.push(ship, mof);
+                                uS.push(ship);
                                 return;
                             }
                     }else if(ships.findShipPtr(this->nextX,this->nextY)->Ship_lives==1 && ships.findShipPtr(this->nextX,this->nextY)->Ship_die==false){
                         ships.findShipPtr(this->nextX,this->nextY)->Ship_die=true;
-                        mof << this->Ship_name << " step on " << field.checkCell(this->nextY,this->nextX) << " and eliminated it!" << endl;
+                        mof << this->Ship_name << " step on " << field.checkCell(this->nextY,this->nextX) << " and eliminated it!" << std::endl;
                         ships.deleteNode(ships.findShipPtr(this->nextX,this->nextY));
                         field.updateField(this,this->nextY,this->nextX);
                         field.FieldBack(this->posY,this->posX);
@@ -415,18 +383,18 @@ void Cruiser::step(Field& field,LinkedList& ships,Queue& DESships,Stack& uS, ofs
                         CanMove=false;
                         this->Ship_kill_count++;
                         if(this->Ship_kill_count==3){
-                            mof << this->Ship_name << " upgrade to Destroyer!" << endl;
-                            Ship* ship=updateShip(this->Team_name,"Destroyer",this->Ship_name,this->posX,this->posY,field,ships,DESships,uS, mof);
+                            mof << this->Ship_name << " upgrade to Destroyer!" << std::endl;
+                            Ship* ship=updateShip(this->Team_name,"Destroyer",this->Ship_name,this->posX,this->posY,field,ships,DESships,uS);
                             this->Ship_upgrade=true;
-                            uS.push(ship, mof);
+                            uS.push(ship);
                             return;
                         }
                     }
                 }else if(ships.findShipTeam(this->nextX,this->nextY)!=this->Team_name && field.checkCell(this->nextY,this->nextX)!="0"){
-                    mof<<this->Ship_name<<" step on enemy ship: "<<ships.findShipname(this->nextX,this->nextY)<< "(" << this->nextX << "," << this->nextY <<")"<< endl; 
+                    mof<<this->Ship_name<<" step on enemy ship: "<<ships.findShipname(this->nextX,this->nextY)<< "(" << this->nextX << "," << this->nextY <<")"<< std::endl; 
                     if(ships.findShipPtr(this->nextX,this->nextY)->Ship_lives>1){
                         ships.findShipPtr(this->nextX,this->nextY)->Ship_lives--;
-                        mof<<ships.findShipname(this->nextX,this->nextY)<<" remain "<<ships.findShipPtr(this->nextX,this->nextY)->Ship_lives <<" lives."<<endl;
+                        mof<<ships.findShipname(this->nextX,this->nextY)<<" remain "<<ships.findShipPtr(this->nextX,this->nextY)->Ship_lives <<" lives."<<std::endl;
                         if(ships.findShipPtr(this->nextX,this->nextY)->Ship_upgrade==false){
                         DESships.enqueue(ships.findShipPtr(this->nextX,this->nextY));
                         }
@@ -440,15 +408,15 @@ void Cruiser::step(Field& field,LinkedList& ships,Queue& DESships,Stack& uS, ofs
                         CanMove=false;
                         this->Ship_kill_count++;
                             if(this->Ship_kill_count==3){
-                                mof << this->Ship_name << " upgrade to Destroyer!" << endl;
-                                Ship* ship=updateShip(this->Team_name,"Destroyer",this->Ship_name,this->posX,this->posY,field,ships,DESships,uS, mof);
+                                mof << this->Ship_name << " upgrade to Destroyer!" << std::endl;
+                                Ship* ship=updateShip(this->Team_name,"Destroyer",this->Ship_name,this->posX,this->posY,field,ships,DESships,uS);
                                 this->Ship_upgrade=true;
-                                uS.push(ship, mof);
+                                uS.push(ship);
                                 return;
                             }
                     }else if(ships.findShipPtr(this->nextX,this->nextY)->Ship_lives==1 && ships.findShipPtr(this->nextX,this->nextY)->Ship_die==false){
                         ships.findShipPtr(this->nextX,this->nextY)->Ship_die=true;
-                        mof << this->Ship_name << " step on " << field.checkCell(this->nextY,this->nextX) << " and eliminated it!" << endl;
+                        mof << this->Ship_name << " step on " << field.checkCell(this->nextY,this->nextX) << " and eliminated it!" << std::endl;
                         ships.deleteNode(ships.findShipPtr(this->nextX,this->nextY));
                         field.updateField(this,this->nextY,this->nextX);
                         field.FieldBack(this->posY,this->posX);
@@ -459,15 +427,15 @@ void Cruiser::step(Field& field,LinkedList& ships,Queue& DESships,Stack& uS, ofs
                         CanMove=false;
                         this->Ship_kill_count++;
                         if(this->Ship_kill_count==3){
-                            mof << this->Ship_name << " upgrade to Destroyer!" << endl;
-                            Ship* ship = updateShip(this->Team_name,"Destroyer",this->Ship_name,this->posX,this->posY,field,ships,DESships,uS, mof);
+                            mof << this->Ship_name << " upgrade to Destroyer!" << std::endl;
+                            Ship* ship = updateShip(this->Team_name,"Destroyer",this->Ship_name,this->posX,this->posY,field,ships,DESships,uS);
                             this->Ship_upgrade=true;
-                            uS.push(ship, mof);
+                            uS.push(ship);
                             return;
                         }
                     }
                 }else if(field.checkCell(this->nextY,this->nextX)=="0"){
-                    mof<<this->Ship_name<<" move to (" << this->nextX << "," << this->nextY <<")"<< endl; 
+                    mof<<this->Ship_name<<" move to (" << this->nextX << "," << this->nextY <<")"<< std::endl; 
                     field.updateField(this,this->nextY,this->nextX);
                     field.FieldBack(this->posY,this->posX);
                     this->posX=this->nextX;
@@ -477,19 +445,19 @@ void Cruiser::step(Field& field,LinkedList& ships,Queue& DESships,Stack& uS, ofs
                     CanMove=false;
                 }
             }else{
-                mof<<this->Ship_type<<" is bugging" << endl;
+                mof<<this->Ship_type<<" is bugging" << std::endl;
             }
         }
-void Cruiser::actions(Field& field,LinkedList& ships,Queue& DESships,Stack& uS, ofstream& mof){
-            mof<<this->Ship_type<<" "<<this->Ship_name<<" from Team " << this->Team_name <<" at (" << this->posX<<","<<this->posY<<") start actions:"<< endl;
-            look(field,ships, mof);
-            step(field,ships,DESships,uS, mof);
-            mof<<endl;
+        void Cruiser::actions(Field& field,LinkedList& ships,Queue& DESships,Stack& uS) {
+            mof<<this->Ship_type<<" "<<this->Ship_name<<" from Team " << this->Team_name <<" at (" << this->posX<<","<<this->posY<<") start actions:"<< std::endl;
+            look(field,ships);
+            step(field,ships,DESships,uS);
+            mof<<std::endl;
         }
+        
 
-//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-Destroyer::Destroyer(char Team_name,string Ship_name,int posX,int posY,Field& field,LinkedList& ships,Queue& DESships,Stack& uS, ofstream& mof){
+        Destroyer::Destroyer(char Team_name,std::string Ship_name,int posX,int posY,Field& field,LinkedList& ships,Queue& DESships,Stack& uS){
             this->Ship_lives=3;
             this->Team_name = Team_name;
             this->Ship_name = Ship_name;
@@ -497,83 +465,83 @@ Destroyer::Destroyer(char Team_name,string Ship_name,int posX,int posY,Field& fi
             this->posX = posX;
             this->posY = posY;
         }
-void Destroyer::updateF(Field& field){
+        void Destroyer::updateF(Field& field){
             field.updateField(this,this->posY,this->posX);
         }
 
-void Destroyer::look(Field& field,LinkedList& ships, ofstream& mof) {
+        void Destroyer::look(Field& field,LinkedList& ships) {
             int startingX=0,endingX=0,startingY=0,endingY=0;
             int NewP=0;
             //remember row , column left -> down! so y is row and x is column
             //for findShipname function,provide x first then y
             if( this->posX-1<0 || this->posY-1<0 || this->posX+2>9 || this->posY+2>9){
                 if(this->posX-1<0 && this->posY-1<0){ //top left
-                    //cout <<"Enter top left" << endl;
+                    //cout <<"Enter top left" << std::endl;
                     startingX=this->posX;
                     startingY=this->posY;
                     endingX=this->posX+2;
                     endingY=this->posY+2;
                 }else if(this->posX+2>9 && this->posY-1<0){ //top right
-                    //cout <<"Enter top right" << endl;
+                    //cout <<"Enter top right" << std::endl;
                     startingX=this->posX-1;
                     startingY=this->posY;
                     endingX=this->posX+1;
                     endingY=this->posY+2; 
                 }else if(this->posX-1<0 && this->posY+2>9){
-                    //cout <<"Enter bottom left" << endl;
+                    //cout <<"Enter bottom left" << std::endl;
                     startingX=this->posX;
                     startingY=this->posY-1;
                     endingX=this->posX+2;
                     endingY=this->posY+1;    
                 }else if(this->posX+2>9 && posY+2>9){
-                    //cout <<"Enter bottom right" << endl;
+                    //cout <<"Enter bottom right" << std::endl;
                     startingX=this->posX-1;
                     startingY=this->posY-1;
                     endingX=this->posX+1;
                     endingY=this->posY+1;  
                 }else if(this->posX-1<0){
-                    //cout <<"Enter left" << endl;
+                    //cout <<"Enter left" << std::endl;
                     startingX=this->posX;
                     startingY=this->posY-1;
                     endingX=this->posX+2;
                     endingY=this->posY+2;  
                 }else if(this->posY-1<0){
-                    //cout <<"Enter top" << endl;
+                    //cout <<"Enter top" << std::endl;
                     startingX=this->posX-1;
                     startingY=this->posY;
                     endingX=this->posX+2;
                     endingY=this->posY+2;  
                 }else if(this->posX+2>9){
-                   //cout <<"Enter right" << endl;
+                   //cout <<"Enter right" << std::endl;
                     startingX=this->posX-1;
                     startingY=this->posY-1;
                     endingX=this->posX+1;
                     endingY=this->posY+2;  
                 }else if(this->posY+2>9){
-                    //cout <<"Enter down" << endl;
+                    //cout <<"Enter down" << std::endl;
                     startingX=this->posX-1;
                     startingY=this->posY-1;
                     endingX=this->posX+1;
                     endingY=this->posY+1;  
                 }
             }else{
-                //cout<<"Enter ram" << endl;
+                //cout<<"Enter ram" << std::endl;
                 startingX = (this->posX)-1;
-                //cout << startingX << endl;
+                //cout << startingX << std::endl;
                 endingX = (this->posX)+2;
-                //cout << endingX << endl;
+                //cout << endingX << std::endl;
                 startingY = (this->posY)-1;
-                //cout << startingY << endl;
+                //cout << startingY << std::endl;
                 endingY = (this->posY+2);
-                //cout << endingY << endl;
+                //cout << endingY << std::endl;
             }
 
             for(int row=startingY;row<endingY;row++){
                 for(int column=startingX;column<endingX;column++){
-                    //cout <<column<<","<<row<<endl;
-                    //cout<<ships.findShipname(column,row)<<endl;
+                    //cout <<column<<","<<row<<std::endl;
+                    //cout<<ships.findShipname(column,row)<<std::endl;
                     if(field.checkCell(row,column)==ships.findShipname(column,row)&&field.checkCell(row,column)!=this->Ship_name&&ships.findShipTeam(column,row)!=this->Team_name){
-                        mof<<this->Ship_name<<" found Enemy ship: "<<ships.findShipname(column,row)<<" at (" << column <<","<<row<<") " << endl;
+                        mof<<this->Ship_name<<" found Enemy ship: "<<ships.findShipname(column,row)<<" at (" << column <<","<<row<<") " << std::endl;
                         if( row==this->posY-1 && column==this->posX || row==posY+1 && column==this->posX || column==posX+1 && row==this->posY || column==posX-1 && row==this->posY){
                         this->nextX=column;
                         this->nextY=row;
@@ -581,11 +549,11 @@ void Destroyer::look(Field& field,LinkedList& ships, ofstream& mof) {
                         break;
                         }
                     }else if(field.checkCell(row,column)==ships.findShipname(column,row)&&field.checkCell(row,column)!=this->Ship_name&&ships.findShipTeam(column,row)==this->Team_name){
-                        mof<<this->Ship_name<<" found Freindly Ship: "<<ships.findShipname(column,row)<<" at (" << column <<","<<row<<") " << endl;
+                        mof<<this->Ship_name<<" found Freindly Ship: "<<ships.findShipname(column,row)<<" at (" << column <<","<<row<<") " << std::endl;
                     }
                     if(field.checkCell(row,column)=="0" || (field.checkCell(row,column)!=this->Ship_name && ships.findShipTeam(column,row)==this->Team_name)){
                         if( row==this->posY-1 && column==this->posX || row==posY+1 && column==this->posX || column==posX+1 && row==this->posY || column==posX-1 && row==this->posY){
-                            //cout<<this->Ship_name<<" can move to "<<column<<","<<row<<endl;
+                            //cout<<this->Ship_name<<" can move to "<<column<<","<<row<<std::endl;
                             ++NewP;
                         }
                     }
@@ -594,7 +562,7 @@ void Destroyer::look(Field& field,LinkedList& ships, ofstream& mof) {
             if(NewP!=0){  //laszy ass way to decide next move :)
                 CanMove = true;
                 int decide = (rand() % NewP)+1;
-                //cout << decide << endl;
+                //cout << decide << std::endl;
                 int reaching=0;
                 for(int row=startingY;row<endingY;row++){
                     for(int column=startingX;column<endingX;column++){
@@ -608,7 +576,7 @@ void Destroyer::look(Field& field,LinkedList& ships, ofstream& mof) {
                                         //cout<<this->nextX<<" and "<<this->nextY;
                                         break;
                                     }
-                                    //cout<<reaching<<endl;
+                                    //cout<<reaching<<std::endl;
                                 }
                             }
                         }
@@ -618,13 +586,13 @@ void Destroyer::look(Field& field,LinkedList& ships, ofstream& mof) {
                 CanMove=true;
             }
         }
-        void Destroyer::step(Field& field,LinkedList& ships,Queue& DESships,Stack& uS, ofstream& mof) {
+        void Destroyer::step(Field& field,LinkedList& ships,Queue& DESships,Stack& uS){
             if(CanMove){
                 if(ships.findShipTeam(this->nextX,this->nextY)==this->Team_name && field.checkCell(this->nextY,this->nextX)!="0"){
-                    mof<<this->Ship_name<<" step on friendly ship: "<<ships.findShipname(this->nextX,this->nextY)<< "(" << this->nextX << "," << this->nextY <<")"<< endl; 
+                    mof<<this->Ship_name<<" step on fristd::endly ship: "<<ships.findShipname(this->nextX,this->nextY)<< "(" << this->nextX << "," << this->nextY <<")"<< std::endl; 
                     if(ships.findShipPtr(this->nextX,this->nextY)->Ship_lives>1){
                         ships.findShipPtr(this->nextX,this->nextY)->Ship_lives--;
-                        mof<<ships.findShipname(this->nextX,this->nextY)<<" remain "<<ships.findShipPtr(this->nextX,this->nextY)->Ship_lives <<" lives."<<endl;
+                        mof<<ships.findShipname(this->nextX,this->nextY)<<" remain "<<ships.findShipPtr(this->nextX,this->nextY)->Ship_lives <<" lives."<<std::endl;
                         if(ships.findShipPtr(this->nextX,this->nextY)->Ship_upgrade==false){
                         DESships.enqueue(ships.findShipPtr(this->nextX,this->nextY));
                         }
@@ -638,15 +606,15 @@ void Destroyer::look(Field& field,LinkedList& ships, ofstream& mof) {
                         CanMove=false;
                         this->Ship_kill_count++;
                             if(this->Ship_kill_count==3){
-                                mof << this->Ship_name << " upgrade to SuperShip!" << endl;
-                                Ship* ship=updateShip(this->Team_name,"SuperShip",this->Ship_name,this->posX,this->posY,field,ships,DESships,uS, mof);
+                                mof << this->Ship_name << " upgrade to SuperShip!" << std::endl;
+                                Ship* ship=updateShip(this->Team_name,"SuperShip",this->Ship_name,this->posX,this->posY,field,ships,DESships,uS);
                                 this->Ship_upgrade=true;
-                                uS.push(ship, mof);
+                                uS.push(ship);
                                 return;
                             }
                     }else if(ships.findShipPtr(this->nextX,this->nextY)->Ship_lives==1 && ships.findShipPtr(this->nextX,this->nextY)->Ship_die==false){
                         ships.findShipPtr(this->nextX,this->nextY)->Ship_die=true;
-                        mof << this->Ship_name << " step on " << field.checkCell(this->nextY,this->nextX) << " and eliminated it!" << endl;
+                        mof << this->Ship_name << " step on " << field.checkCell(this->nextY,this->nextX) << " and eliminated it!" << std::endl;
                         ships.deleteNode(ships.findShipPtr(this->nextX,this->nextY));
                         field.updateField(this,this->nextY,this->nextX);
                         field.FieldBack(this->posY,this->posX);
@@ -657,18 +625,18 @@ void Destroyer::look(Field& field,LinkedList& ships, ofstream& mof) {
                         CanMove=false;
                         this->Ship_kill_count++;
                         if(this->Ship_kill_count==3){
-                            mof << this->Ship_name << " upgrade to SuperShip!" << endl;
-                            Ship* ship=updateShip(this->Team_name,"SuperShip",this->Ship_name,this->posX,this->posY,field,ships,DESships,uS, mof);
+                            mof << this->Ship_name << " upgrade to SuperShip!" << std::endl;
+                            Ship* ship=updateShip(this->Team_name,"SuperShip",this->Ship_name,this->posX,this->posY,field,ships,DESships,uS);
                             this->Ship_upgrade=true;
-                            uS.push(ship, mof);
+                            uS.push(ship);
                             return;
                         }
                     }
                 }else if(ships.findShipTeam(this->nextX,this->nextY)!=this->Team_name && field.checkCell(this->nextY,this->nextX)!="0"){
-                    mof<<this->Ship_name<<" step on enemy ship: "<<ships.findShipname(this->nextX,this->nextY)<< "(" << this->nextX << "," << this->nextY <<")"<< endl; 
+                    mof<<this->Ship_name<<" step on enemy ship: "<<ships.findShipname(this->nextX,this->nextY)<< "(" << this->nextX << "," << this->nextY <<")"<< std::endl; 
                     if(ships.findShipPtr(this->nextX,this->nextY)->Ship_lives>1){
                         ships.findShipPtr(this->nextX,this->nextY)->Ship_lives--;
-                        mof<<ships.findShipname(this->nextX,this->nextY)<<" remain "<<ships.findShipPtr(this->nextX,this->nextY)->Ship_lives <<" lives."<<endl;
+                        mof<<ships.findShipname(this->nextX,this->nextY)<<" remain "<<ships.findShipPtr(this->nextX,this->nextY)->Ship_lives <<" lives."<<std::endl;
                         if(ships.findShipPtr(this->nextX,this->nextY)->Ship_upgrade==false){
                         DESships.enqueue(ships.findShipPtr(this->nextX,this->nextY));
                         }
@@ -682,15 +650,15 @@ void Destroyer::look(Field& field,LinkedList& ships, ofstream& mof) {
                         CanMove=false;
                         this->Ship_kill_count++;
                             if(this->Ship_kill_count==3){
-                                mof << this->Ship_name << " upgrade to SuperShip!" << endl;
-                                Ship* ship=updateShip(this->Team_name,"SuperShip",this->Ship_name,this->posX,this->posY,field,ships,DESships,uS, mof);
+                                mof << this->Ship_name << " upgrade to SuperShip!" << std::endl;
+                                Ship* ship=updateShip(this->Team_name,"SuperShip",this->Ship_name,this->posX,this->posY,field,ships,DESships,uS);
                                 this->Ship_upgrade=true;
-                                uS.push(ship, mof);
+                                uS.push(ship);
                                 return;
                             }
                     }else if(ships.findShipPtr(this->nextX,this->nextY)->Ship_lives==1 && ships.findShipPtr(this->nextX,this->nextY)->Ship_die==false){
                         ships.findShipPtr(this->nextX,this->nextY)->Ship_die=true;
-                        mof << this->Ship_name << " step on " << field.checkCell(this->nextY,this->nextX) << " and eliminated it!" << endl;
+                        mof << this->Ship_name << " step on " << field.checkCell(this->nextY,this->nextX) << " and eliminated it!" << std::endl;
                         ships.deleteNode(ships.findShipPtr(this->nextX,this->nextY));
                         field.updateField(this,this->nextY,this->nextX);
                         field.FieldBack(this->posY,this->posX);
@@ -701,15 +669,15 @@ void Destroyer::look(Field& field,LinkedList& ships, ofstream& mof) {
                         CanMove=false;
                         this->Ship_kill_count++;
                         if(this->Ship_kill_count==3){
-                            mof << this->Ship_name << " upgrade to SuperShip!" << endl;
-                            Ship* ship=updateShip(this->Team_name,"SuperShip",this->Ship_name,this->posX,this->posY,field,ships,DESships,uS, mof);
+                            mof << this->Ship_name << " upgrade to SuperShip!" << std::endl;
+                            Ship* ship=updateShip(this->Team_name,"SuperShip",this->Ship_name,this->posX,this->posY,field,ships,DESships,uS);
                             this->Ship_upgrade=true;
-                            uS.push(ship, mof);
+                            uS.push(ship);
                             return;
                         }
                     }
                 }else if(field.checkCell(this->nextY,this->nextX)=="0"){
-                    mof<<this->Ship_name<<" move to (" << this->nextX << "," << this->nextY <<")"<< endl; 
+                    mof<<this->Ship_name<<" move to (" << this->nextX << "," << this->nextY <<")"<< std::endl; 
                     field.updateField(this,this->nextY,this->nextX);
                     field.FieldBack(this->posY,this->posX);
                     this->posX=this->nextX;
@@ -719,10 +687,10 @@ void Destroyer::look(Field& field,LinkedList& ships, ofstream& mof) {
                     CanMove=false;
                 }
             }else{
-                mof<<this->Ship_type<<" is bugging" << endl;
+                mof<<this->Ship_type<<" is bugging" << std::endl;
             }
         }
-void Destroyer::shoot(Field& field,LinkedList& ships,Queue& DESships,Stack& uS, ofstream& mof) {
+        void Destroyer::shoot(Field& field,LinkedList& ships,Queue& DESships,Stack& uS){
             int x=0,y=0;
             int shots=2;
             int max_range = 5;
@@ -736,39 +704,39 @@ void Destroyer::shoot(Field& field,LinkedList& ships,Queue& DESships,Stack& uS, 
                 y = (rand() % 11)-5;
                 calXY = abs(x) + abs(y);
                 }
-                //cout <<x << " "<<y<<endl;
+                //cout <<x << " "<<y<<std::endl;
                 if(ships.findShipTeam(posX+x,posY+y)!=this->Team_name || field.checkCell(posY+y,posX+x)=="0" || field.checkCell(posY+y,posX+x)=="1"){
-                    //cout <<x << " "<<y<<endl; //check not same team also check not itself hehe
+                    //cout <<x << " "<<y<<std::endl; //check not same team also check not itself hehe
                     if(field.checkCell(posY+y,posX+x)=="0" || field.checkCell(posY+y,posX+x)=="1" ){
-                        mof << this->Ship_name << " decide to shoot at "<<"(" <<this->posX+x<<","<<this->posY+y<<") and missed." <<endl;
+                        mof << this->Ship_name << " decide to shoot at "<<"(" <<this->posX+x<<","<<this->posY+y<<") and missed." <<std::endl;
                     }else if(field.checkCell(posY+y,posX+x)==ships.findShipname(posX+x,posY+y)){
-                        mof << this->Ship_name << " decide to shoot at "<<field.checkCell(posY+y,posX+x)<<"(" <<this->posX+x<<","<<this->posY+y<<") and successful!" <<endl;
+                        mof << this->Ship_name << " decide to shoot at "<<field.checkCell(posY+y,posX+x)<<"(" <<this->posX+x<<","<<this->posY+y<<") and successful!" <<std::endl;
                         if(ships.findShipPtr(posX+x,posY+y)->Ship_lives>1){
                             ships.findShipPtr(posX+x,posY+y)->Ship_lives--;
                             this->Ship_kill_count++;
-                            mof<<ships.findShipname(posX+x,posY+y)<<" remain "<<ships.findShipPtr(posX+x,posY+y)->Ship_lives <<" lives."<<endl;;
+                            mof<<ships.findShipname(posX+x,posY+y)<<" remain "<<ships.findShipPtr(posX+x,posY+y)->Ship_lives <<" lives."<<std::endl;;
                             if(ships.findShipPtr(posX+x,posY+y)->Ship_upgrade==false){
                             DESships.enqueue(ships.findShipPtr(posX+x,posY+y));
                             }
                             ships.deleteNode(ships.findShipPtr(posX+x,posY+y));
                             field.FieldBack(posY+y,posX+x);
                             if(this->Ship_kill_count==3){
-                                mof << this->Ship_name << " upgrade to SuperShip!" << endl;
-                                Ship* ship=updateShip(this->Team_name,"SuperShip",this->Ship_name,this->posX,this->posY,field,ships,DESships,uS, mof);
+                                mof << this->Ship_name << " upgrade to SuperShip!" << std::endl;
+                                Ship* ship=updateShip(this->Team_name,"SuperShip",this->Ship_name,this->posX,this->posY,field,ships,DESships,uS);
                                 this->Ship_upgrade=true;
-                                uS.push(ship, mof);
+                                uS.push(ship);
                                 break;
                             }
                         }else if(ships.findShipPtr(this->posX+x,this->posY+y)->Ship_lives==1 && ships.findShipPtr(this->posX+x,this->posY+y)->Ship_die==false){
                             ships.findShipPtr(this->posX+x,this->posY+y)->Ship_die==true;
-                            mof << this->Ship_name << " eliminated "<<field.checkCell(posY+y,posX+x)<<"(" <<this->posX+x<<","<<this->posY+y<<") !" <<endl;
+                            mof << this->Ship_name << " eliminated "<<field.checkCell(posY+y,posX+x)<<"(" <<this->posX+x<<","<<this->posY+y<<") !" <<std::endl;
                             ships.deleteNode(ships.findShipPtr(this->posX+x,this->posY+y));
                             field.FieldBack(this->posY+y,this->posX+x);
                              if(this->Ship_kill_count==3){
-                                mof << this->Ship_name << " upgrade to SuperShip!" << endl;
-                                Ship* ship=updateShip(this->Team_name,"SuperShip",this->Ship_name,this->posX,this->posY,field,ships,DESships,uS, mof);
+                                mof << this->Ship_name << " upgrade to SuperShip!" << std::endl;
+                                Ship* ship=updateShip(this->Team_name,"SuperShip",this->Ship_name,this->posX,this->posY,field,ships,DESships,uS);
                                 this->Ship_upgrade=true;
-                                uS.push(ship, mof);
+                                uS.push(ship);
                                 break;
                                 }  
                         }
@@ -776,26 +744,23 @@ void Destroyer::shoot(Field& field,LinkedList& ships,Queue& DESships,Stack& uS, 
                 }  
             }
         }
-
-void Destroyer::actions(Field& field,LinkedList& ships,Queue& DESships,Stack& uS, ofstream& mof) {
+        void Destroyer::actions(Field& field,LinkedList& ships,Queue& DESships,Stack& uS){
             if(!this->ShootPosition){
                 updateF(field);
                 this->ShootPosition=true;
             }
-            mof<<this->Ship_type<<" "<<this->Ship_name<<" from Team " << this->Team_name <<" at (" << this->posX<<","<<this->posY<<") start actions:"<< endl;
-            look(field,ships, mof);
-            step(field,ships,DESships,uS, mof);
+            mof<<this->Ship_type<<" "<<this->Ship_name<<" from Team " << this->Team_name <<" at (" << this->posX<<","<<this->posY<<") start actions:"<< std::endl;
+            look(field,ships);
+            step(field,ships,DESships,uS);
             if(this->Ship_upgrade){
                 return;
             }
-            shoot(field,ships,DESships,uS, mof);
-            mof<<endl;
+            shoot(field,ships,DESships,uS);
+            mof<<std::endl;
         }
 
-//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-
-Frigate::Frigate(char Team_name,string Ship_name,Field& field,LinkedList& ships,Queue& DESships,Stack& uS, ofstream& mof){
+        Frigate::Frigate(char Team_name,std::string Ship_name,Field& field,LinkedList& ships,Queue& DESships,Stack& uS){
             this->Team_name = Team_name;
             this->Ship_name = Ship_name;
             this->Ship_type = "Frigate";
@@ -809,7 +774,7 @@ Frigate::Frigate(char Team_name,string Ship_name,Field& field,LinkedList& ships,
             }
         }
 
-void Frigate::shoot(Field& field,LinkedList& ships,Queue& DESships,Stack& uS, ofstream& mof) { //sorry but i refuse
+        void Frigate::shoot(Field& field,LinkedList& ships,Queue& DESships,Stack& uS) { //sorry but i refuse
             if(this->record>7){
                 this->record=0;
             }
@@ -826,7 +791,7 @@ void Frigate::shoot(Field& field,LinkedList& ships,Queue& DESships,Stack& uS, of
             if(!this->ShootPosition){
                 for (int i = 0; i < 8; i++) {
                     if( this->posX + directions[i][0]>=0 && this->posY + directions[i][1]>=0 && this->posX + directions[i][0]<10 && this->posY + directions[i][1]<10){
-                        //cout<<i<< endl;
+                        //cout<<i<< std::endl;
                         this->targetX = this->posX + directions[i][0];
                         this->targetY = this->posY + directions[i][1];
                         this->record = i;
@@ -837,13 +802,13 @@ void Frigate::shoot(Field& field,LinkedList& ships,Queue& DESships,Stack& uS, of
             }
 
             if(this->ShootPosition){
-                    string targetName = ships.findShipname(this->targetX, this->targetY);
+                    std::string targetName = ships.findShipname(this->targetX, this->targetY);
                     if (targetName != "nothing" && ships.findShipTeam(this->targetX, this->targetY) != this->Team_name) {
-                        mof << this->Ship_name << " shoots at (" << targetX << "," << targetY << ") and hits enemy ship: " << targetName << "!" << endl;
+                        mof << this->Ship_name << " shoots at (" << targetX << "," << targetY << ") and hits enemy ship: " << targetName << "!" << std::endl;
                         Ship* targetShip = ships.findShipPtr(targetX, targetY);
                         targetShip->Ship_lives--;
                         if(targetShip->Ship_lives>1){
-                        mof<<targetShip->Ship_name<<" remain "<<targetShip->Ship_lives << " lives." << endl;
+                        mof<<targetShip->Ship_name<<" remain "<<targetShip->Ship_lives << " lives." << std::endl;
                         if(targetShip->Ship_upgrade==false){
                         DESships.enqueue(targetShip);
                         }
@@ -851,27 +816,27 @@ void Frigate::shoot(Field& field,LinkedList& ships,Queue& DESships,Stack& uS, of
                         field.FieldBack(this->targetY, this->targetX);
                         this->Ship_kill_count++;
                             if(this->Ship_kill_count==3){
-                                mof << this->Ship_name << " upgrade to Corvette!" << endl;
-                                Ship* ship=updateShip(this->Team_name,"Corvette",this->Ship_name,this->posX,this->posY,field,ships,DESships,uS, mof);
+                                mof << this->Ship_name << " upgrade to Corvette!" << std::endl;
+                                Ship* ship=updateShip(this->Team_name,"Corvette",this->Ship_name,this->posX,this->posY,field,ships,DESships,uS);
                                 this->Ship_upgrade=true;
-                                uS.push(ship, mof);
+                                uS.push(ship);
                                 return;
                             }
                         }else if (targetShip->Ship_lives == 1 && targetShip->Ship_die==false) {
                             targetShip->Ship_die=true;
-                            mof << targetName << " is eliminated by "<<this->Ship_name<< "!" << endl;
+                            mof << targetName << " is eliminated by "<<this->Ship_name<< "!" << std::endl;
                             ships.deleteNode(targetShip);
                             field.FieldBack(targetY, targetX);
                             this->Ship_kill_count++;
                             if(this->Ship_kill_count==3){
-                                mof << this->Ship_name << " upgrade to Corvette!" << endl;
-                                Ship* ship=updateShip(this->Team_name,"Corvette",this->Ship_name,this->posX,this->posY,field,ships,DESships,uS, mof);
-                                uS.push(ship, mof);
+                                mof << this->Ship_name << " upgrade to Corvette!" << std::endl;
+                                Ship* ship=updateShip(this->Team_name,"Corvette",this->Ship_name,this->posX,this->posY,field,ships,DESships,uS);
+                                uS.push(ship);
                                 return;
                             }
                         }
                     }else {
-                        mof << this->Ship_name << " shoots at (" << targetX << "," << targetY << ") and missed the shot.." << endl;
+                        mof << this->Ship_name << " shoots at (" << targetX << "," << targetY << ") and missed the shot.." << std::endl;
                     }
                     record++;
                     this->targetX = this->posX + directions[this->record][0];
@@ -882,15 +847,14 @@ void Frigate::shoot(Field& field,LinkedList& ships,Queue& DESships,Stack& uS, of
                 }
             }
 
-void Frigate::actions(Field& field,LinkedList& ships,Queue& DESships,Stack& uS, ofstream& mof) {
-            mof << this->Ship_type << " " << this->Ship_name << " from Team " << this->Team_name << " at (" << this->posX << "," << this->posY << ") start actions:" << endl;
-            shoot(field, ships, DESships,uS, mof);
-            mof<<endl;
+        void Frigate::actions(Field& field,LinkedList& ships,Queue& DESships,Stack& uS){
+            mof << this->Ship_type << " " << this->Ship_name << " from Team " << this->Team_name << " at (" << this->posX << "," << this->posY << ") start actions:" << std::endl;
+            shoot(field, ships, DESships,uS);
+            mof<<std::endl;
         }
 
-//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-Corvette::Corvette(char Team_name,string Ship_name,int posX,int posY,Field& field,LinkedList& ships,Queue& DESships,Stack& uS, ofstream& mof){
+    Corvette::Corvette(char Team_name,std::string Ship_name,int posX,int posY,Field& field,LinkedList& ships,Queue& DESships,Stack& uS){
             this->Team_name = Team_name;
             this->Ship_name = Ship_name;
             this->Ship_type = "Corvette";
@@ -899,11 +863,11 @@ Corvette::Corvette(char Team_name,string Ship_name,int posX,int posY,Field& fiel
             this->posY = posY;
     }
 
-void Corvette::updateF(Field& field){
+    void Corvette::updateF(Field& field){
         field.updateField(this,this->posY,this->posX);
         }
 
-void Corvette::shoot(Field& field,LinkedList& ships,Queue& DESships,Stack& uS, ofstream& mof){
+    void Corvette::shoot(Field& field,LinkedList& ships,Queue& DESships,Stack& uS){
             int x=0,y=0;
             int shots=2;
             int max_X = 1;
@@ -920,14 +884,14 @@ void Corvette::shoot(Field& field,LinkedList& ships,Queue& DESships,Stack& uS, o
                 }
                 if(ships.findShipTeam(posX+x,posY+y)!=this->Team_name || field.checkCell(posY+y,posX+x)=="0" || field.checkCell(posY+y,posX+x)=="1"){
                     if(field.checkCell(posY+y,posX+x)=="0" || field.checkCell(posY+y,posX+x)=="1" ){
-                        mof << this->Ship_name << " decide to shoot at "<<"(" <<this->posX+x<<","<<this->posY+y<<") and missed." <<endl;
+                        mof << this->Ship_name << " decide to shoot at "<<"(" <<this->posX+x<<","<<this->posY+y<<") and missed." <<std::endl;
                     }
                     if(field.checkCell(this->posY+y,this->posX+x)==ships.findShipname(this->posX+x,this->posY+y)){
-                        mof << this->Ship_name << " decide to shoot at "<<field.checkCell(posY+y,posX+x)<<"(" <<this->posX+x<<","<<this->posY+y<<") and successful!" <<endl;
+                        mof << this->Ship_name << " decide to shoot at "<<field.checkCell(posY+y,posX+x)<<"(" <<this->posX+x<<","<<this->posY+y<<") and successful!" <<std::endl;
                         if(ships.findShipPtr(this->posX+x,this->posY+y)->Ship_lives>1){
                         ships.findShipPtr(this->posX+x,this->posY+y)->Ship_lives--;
                         this->Ship_kill_count++;
-                        mof<<ships.findShipname(this->posX+x,this->posY+y)<<" remain "<<ships.findShipPtr(this->posX+x,this->posY+y)->Ship_lives <<" lives."<<endl;;
+                        mof<<ships.findShipname(this->posX+x,this->posY+y)<<" remain "<<ships.findShipPtr(this->posX+x,this->posY+y)->Ship_lives <<" lives."<<std::endl;;
                         if(ships.findShipPtr(this->posX+x,this->posY+y)->Ship_upgrade==false){
                             DESships.enqueue(ships.findShipPtr(this->posX+x,this->posY+y));
                         }
@@ -935,7 +899,7 @@ void Corvette::shoot(Field& field,LinkedList& ships,Queue& DESships,Stack& uS, o
                         field.FieldBack(this->posY+y,this->posX+x);
                         }else if(ships.findShipPtr(this->posX+x,this->posY+y)->Ship_lives==1 && ships.findShipPtr(this->posX+x,this->posY+y)->Ship_die==false){
                             ships.findShipPtr(this->nextX,this->nextY)->Ship_die=true;
-                            mof << this->Ship_name << " eliminated "<<field.checkCell(posY+y,posX+x)<<"(" <<this->posX+x<<","<<this->posY+y<<") !" <<endl;
+                            mof << this->Ship_name << " eliminated "<<field.checkCell(posY+y,posX+x)<<"(" <<this->posX+x<<","<<this->posY+y<<") !" <<std::endl;
                             ships.deleteNode(ships.findShipPtr(posX+x,posY+y));
                             field.FieldBack(posY+y,posX+x);
                         }
@@ -943,18 +907,17 @@ void Corvette::shoot(Field& field,LinkedList& ships,Queue& DESships,Stack& uS, o
                 }  
             }
     }
-void Corvette::actions(Field& field,LinkedList& ships,Queue& DESships,Stack& uS, ofstream& mof) {
+    void Corvette::actions(Field& field,LinkedList& ships,Queue& DESships,Stack& uS){
         if(!this->ShootPosition){
                 updateF(field);
                 this->ShootPosition=true;
             }
-        mof << this->Ship_type << " " << this->Ship_name << " from Team " << this->Team_name << " at (" << this->posX << "," << this->posY << ") start actions:" << endl;
-        shoot(field, ships, DESships,uS, mof);
+        mof << this->Ship_type << " " << this->Ship_name << " from Team " << this->Team_name << " at (" << this->posX << "," << this->posY << ") start actions:" << std::endl;
+        shoot(field, ships, DESships,uS);
     }
 
-//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-Amphibious::Amphibious(char Team_name,string Ship_name,Field& field,LinkedList& ships,Queue& DESships,Stack& uS, ofstream& mof){
+    Amphibious::Amphibious(char Team_name,std::string Ship_name,Field& field,LinkedList& ships,Queue& DESships,Stack& uS){
             this->Team_name = Team_name;
             this->Ship_name = Ship_name;
             this->Ship_type = "Amphibious";
@@ -967,85 +930,85 @@ Amphibious::Amphibious(char Team_name,string Ship_name,Field& field,LinkedList& 
                 }
             }
     }
-void Amphibious::look(Field& field,LinkedList& ships, ofstream& mof){
+    void Amphibious::look(Field& field,LinkedList& ships) {
         int startingX=0,endingX=0,startingY=0,endingY=0;
             int NewP=0;
             //remember row , column left -> down! so y is row and x is column
             //for findShipname function,provide x first then y
             if( this->posX-1<0 || this->posY-1<0 || this->posX+2>9 || this->posY+2>9){
                 if(this->posX-1<0 && this->posY-1<0){ //top left
-                    //cout <<"Enter top left" << endl;
+                    //cout <<"Enter top left" << std::endl;
                     startingX=this->posX;
                     startingY=this->posY;
                     endingX=this->posX+2;
                     endingY=this->posY+2;
                 }else if(this->posX+2>9 && this->posY-1<0){ //top right
-                    //cout <<"Enter top right" << endl;
+                    //cout <<"Enter top right" << std::endl;
                     startingX=this->posX-1;
                     startingY=this->posY;
                     endingX=this->posX+1;
                     endingY=this->posY+2; 
                 }else if(this->posX-1<0 && this->posY+2>9){
-                    //cout <<"Enter bottom left" << endl;
+                    //cout <<"Enter bottom left" << std::endl;
                     startingX=this->posX;
                     startingY=this->posY-1;
                     endingX=this->posX+2;
                     endingY=this->posY+1;    
                 }else if(this->posX+2>9 && posY+2>9){
-                    //cout <<"Enter bottom right" << endl;
+                    //cout <<"Enter bottom right" << std::endl;
                     startingX=this->posX-1;
                     startingY=this->posY-1;
                     endingX=this->posX+1;
                     endingY=this->posY+1;  
                 }else if(this->posX-1<0){
-                    //cout <<"Enter left" << endl;
+                    //cout <<"Enter left" << std::endl;
                     startingX=this->posX;
                     startingY=this->posY-1;
                     endingX=this->posX+2;
                     endingY=this->posY+2;  
                 }else if(this->posY-1<0){
-                    //cout <<"Enter top" << endl;
+                    //cout <<"Enter top" << std::endl;
                     startingX=this->posX-1;
                     startingY=this->posY;
                     endingX=this->posX+2;
                     endingY=this->posY+2;  
                 }else if(this->posX+2>9){
-                   //cout <<"Enter right" << endl;
+                   //cout <<"Enter right" << std::endl;
                     startingX=this->posX-1;
                     startingY=this->posY-1;
                     endingX=this->posX+1;
                     endingY=this->posY+2;  
                 }else if(this->posY+2>9){
-                    //cout <<"Enter down" << endl;
+                    //cout <<"Enter down" << std::endl;
                     startingX=this->posX-1;
                     startingY=this->posY-1;
                     endingX=this->posX+1;
                     endingY=this->posY+1;  
                 }
             }else{
-                //cout<<"Enter ram" << endl;
+                //cout<<"Enter ram" << std::endl;
                 startingX = (this->posX)-1;
-                //cout << startingX << endl;
+                //cout << startingX << std::endl;
                 endingX = (this->posX)+2;
-                //cout << endingX << endl;
+                //cout << endingX << std::endl;
                 startingY = (this->posY)-1;
-                //cout << startingY << endl;
+                //cout << startingY << std::endl;
                 endingY = (this->posY+2);
-                //cout << endingY << endl;
+                //cout << endingY << std::endl;
             }
 
             for(int row=startingY;row<endingY;row++){
                 for(int column=startingX;column<endingX;column++){
-                    //cout <<column<<","<<row<<endl;
-                    //cout<<ships.findShipname(column,row)<<endl;
+                    //cout <<column<<","<<row<<std::endl;
+                    //cout<<ships.findShipname(column,row)<<std::endl;
                     if(field.checkCell(row,column)==ships.findShipname(column,row)&&field.checkCell(row,column)!=this->Ship_name&&ships.findShipTeam(column,row)!=this->Team_name){
-                        mof<<this->Ship_name<<" found Enemy ship: "<<ships.findShipname(column,row)<<" at (" << column <<","<<row<<")" << endl;
+                        mof<<this->Ship_name<<" found Enemy ship: "<<ships.findShipname(column,row)<<" at (" << column <<","<<row<<")" << std::endl;
                     }else if(field.checkCell(row,column)==ships.findShipname(column,row)&&field.checkCell(row,column)!=this->Ship_name&&ships.findShipTeam(column,row)==this->Team_name){
-                        mof<<this->Ship_name<<" found Freindly Ship: "<<ships.findShipname(column,row)<<" at (" << column <<","<<row<<") " << endl;
+                        mof<<this->Ship_name<<" found Freindly Ship: "<<ships.findShipname(column,row)<<" at (" << column <<","<<row<<") " << std::endl;
                     }
                     if(field.checkCell(row,column)=="0" ||field.checkCell(row,column)=="1"){
                         if( row==this->posY-1 && column==this->posX || row==posY+1 && column==this->posX || column==posX+1 && row==this->posY || column==posX-1 && row==this->posY){
-                            //cout<<this->Ship_name<<" can move to "<<column<<","<<row<<endl;
+                            //cout<<this->Ship_name<<" can move to "<<column<<","<<row<<std::endl;
                             ++NewP;
                         }
                     }
@@ -1054,7 +1017,7 @@ void Amphibious::look(Field& field,LinkedList& ships, ofstream& mof){
             if(NewP!=0){  //laszy ass way to decide next move :)
                 CanMove = true;
                 int decide = (rand() % NewP)+1;
-                //cout << decide << endl;
+                //cout << decide << std::endl;
                 int reaching=0;
                 for(int row=startingY;row<endingY;row++){
                     for(int column=startingX;column<endingX;column++){
@@ -1068,7 +1031,7 @@ void Amphibious::look(Field& field,LinkedList& ships, ofstream& mof){
                                         //cout<<this->nextX<<" and "<<this->nextY;
                                         break;
                                     }
-                                    //cout<<reaching<<endl;
+                                    //cout<<reaching<<std::endl;
                                 }
                             }
                         }
@@ -1078,9 +1041,9 @@ void Amphibious::look(Field& field,LinkedList& ships, ofstream& mof){
                 CanMove=false;
             }
     }
-void Amphibious::move(Field& field,LinkedList& ships, ofstream& mof){
+    void Amphibious:: move(Field& field,LinkedList& ships){
         if(CanMove){
-                mof<<this->Ship_name<<" move to (" << this->nextX << "," << this->nextY <<")"<< endl; 
+                mof<<this->Ship_name<<" move to (" << this->nextX << "," << this->nextY <<")"<< std::endl; 
                 field.updateField(this,this->nextY,this->nextX);
                 field.FieldBack(this->posY,this->posX);
                 this->posX=this->nextX;
@@ -1089,11 +1052,10 @@ void Amphibious::move(Field& field,LinkedList& ships, ofstream& mof){
                 this->nextY=-1;
                 CanMove=false;
             }else{
-                mof<<this->Ship_name<<" currently can't move." << endl;;
+                mof<<this->Ship_name<<" currently can't move." << std::endl;;
             }
     }
-
-void Amphibious::shoot(Field& field,LinkedList& ships,Queue& DESships,Stack& uS, ofstream& mof) {
+    void Amphibious::shoot(Field& field,LinkedList& ships,Queue& DESships,Stack& uS) {
         int x=0,y=0;
             int shots=2;
             int max_range = 5;
@@ -1107,18 +1069,18 @@ void Amphibious::shoot(Field& field,LinkedList& ships,Queue& DESships,Stack& uS,
                 y = (rand() % 11)-5;
                 calXY = abs(x) + abs(y);
                 }
-                //cout <<x << " "<<y<<endl;
+                //cout <<x << " "<<y<<std::endl;
                 if(ships.findShipTeam(posX+x,posY+y)!=this->Team_name || field.checkCell(posY+y,posX+x)=="0" || field.checkCell(posY+y,posX+x)=="1"){
-                    //cout <<x << " "<<y<<endl; //check not same team also check not itself hehe
+                    //cout <<x << " "<<y<<std::endl; //check not same team also check not itself hehe
                     if(field.checkCell(posY+y,posX+x)=="0" || field.checkCell(posY+y,posX+x)=="1" ){
-                        mof << this->Ship_name << " decide to shoot at "<<"(" <<this->posX+x<<","<<this->posY+y<<") and missed." <<endl;
+                        mof << this->Ship_name << " decide to shoot at "<<"(" <<this->posX+x<<","<<this->posY+y<<") and missed." <<std::endl;
                     }
                     if(field.checkCell(posY+y,posX+x)==ships.findShipname(posX+x,posY+y)){
-                        mof << this->Ship_name << " decide to shoot at "<<field.checkCell(posY+y,posX+x)<<"(" <<this->posX+x<<","<<this->posY+y<<") and successful!" <<endl;
+                        mof << this->Ship_name << " decide to shoot at "<<field.checkCell(posY+y,posX+x)<<"(" <<this->posX+x<<","<<this->posY+y<<") and successful!" <<std::endl;
                         if(ships.findShipPtr(posX+x,posY+y)->Ship_lives>1){
                         ships.findShipPtr(posX+x,posY+y)->Ship_lives--;
                         this->Ship_kill_count++;
-                        mof<<ships.findShipname(posX+x,posY+y)<<" remain "<<ships.findShipPtr(posX+x,posY+y)->Ship_lives <<" lives."<<endl;;
+                        mof<<ships.findShipname(posX+x,posY+y)<<" remain "<<ships.findShipPtr(posX+x,posY+y)->Ship_lives <<" lives."<<std::endl;;
                         if(ships.findShipPtr(posX+x,posY+y)->Ship_upgrade==false){
                             DESships.enqueue(ships.findShipPtr(posX+x,posY+y));
                         }
@@ -1126,23 +1088,23 @@ void Amphibious::shoot(Field& field,LinkedList& ships,Queue& DESships,Stack& uS,
                         field.FieldBack(posY+y,posX+x);
                         //4 to Ds
                             if(this->Ship_kill_count==4){
-                                mof << this->Ship_name << " upgrade to SuperShip!" << endl;
-                                Ship* ship=updateShip(this->Team_name,"SuperShip",this->Ship_name,this->posX,this->posY,field,ships,DESships,uS, mof);
+                                mof << this->Ship_name << " upgrade to SuperShip!" << std::endl;
+                                Ship* ship=updateShip(this->Team_name,"SuperShip",this->Ship_name,this->posX,this->posY,field,ships,DESships,uS);
                                 this->Ship_upgrade=true;
-                                uS.push(ship, mof);
+                                uS.push(ship);
                                 break;
-                                //(const char& Team_name,const string& Ship_Type,const string& Ship_name,const int& posX,const int& posY,Field& field,LinkedList& ships,Queue& DESships)
+                                //(const char& Team_name,const std::string& Ship_Type,const std::string& Ship_name,const int& posX,const int& posY,Field& field,LinkedList& ships,Queue& DESships)
                             }
                         }else if(ships.findShipPtr(posX+x,posY+y)->Ship_lives==1 && ships.findShipPtr(this->posX+x,this->posY+y)->Ship_die==false){
                             ships.findShipPtr(this->posX+x,this->posY+y)->Ship_die==true;
-                            mof << this->Ship_name << " eliminated "<<field.checkCell(posY+y,posX+x)<<"(" <<this->posX+x<<","<<this->posY+y<<") !" <<endl;
+                            mof << this->Ship_name << " eliminated "<<field.checkCell(posY+y,posX+x)<<"(" <<this->posX+x<<","<<this->posY+y<<") !" <<std::endl;
                             ships.deleteNode(ships.findShipPtr(posX+x,posY+y));
                             field.FieldBack(posY+y,posX+x);
                              if(this->Ship_kill_count==4){
-                                mof << this->Ship_name << " upgrade to SuperShip!" << endl;
-                                Ship* ship=updateShip(this->Team_name,"SuperShip",this->Ship_name,this->posX,this->posY,field,ships,DESships,uS, mof);
+                                mof << this->Ship_name << " upgrade to SuperShip!" << std::endl;
+                                Ship* ship=updateShip(this->Team_name,"SuperShip",this->Ship_name,this->posX,this->posY,field,ships,DESships,uS);
                                 this->Ship_upgrade=true;
-                                uS.push(ship, mof);
+                                uS.push(ship);
                                 break;
                                 }  
                         }
@@ -1150,17 +1112,17 @@ void Amphibious::shoot(Field& field,LinkedList& ships,Queue& DESships,Stack& uS,
                 }  
             }
     }
-
-void Amphibious::actions(Field& field,LinkedList& ships,Queue& DESships,Stack& uS, ofstream& mof) {
-            mof<<this->Ship_type<<" "<<this->Ship_name<<" from Team " << this->Team_name <<" at (" << this->posX<<","<<this->posY<<") start actions:"<< endl;
-            look(field,ships, mof);
-            move(field,ships, mof);
-            shoot(field,ships,DESships,uS, mof);
-            mof<<endl;
+    void Amphibious::actions(Field& field,LinkedList& ships,Queue& DESships,Stack& uS){
+            mof<<this->Ship_type<<" "<<this->Ship_name<<" from Team " << this->Team_name <<" at (" << this->posX<<","<<this->posY<<") start actions:"<< std::endl;
+            look(field,ships);
+            move(field,ships);
+            shoot(field,ships,DESships,uS);
+            mof<<std::endl;
         }
 
-//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-SuperShip::SuperShip(char Team_name,string Ship_name,int posX,int posY,Field& field,LinkedList& ships,Queue& DESships,Stack& uS, ofstream& mof){
+
+
+    SuperShip::SuperShip(char Team_name,std::string Ship_name,int posX,int posY,Field& field,LinkedList& ships,Queue& DESships,Stack& uS){
             this->Team_name = Team_name;
             this->Ship_name = Ship_name;
             this->Ship_lives=3;
@@ -1169,83 +1131,82 @@ SuperShip::SuperShip(char Team_name,string Ship_name,int posX,int posY,Field& fi
             this->posY = posY;
     }
 
-void SuperShip::updateF(Field& field){
+    void SuperShip::updateF(Field& field){
         field.updateField(this,this->posY,this->posX);
     }
-
-void SuperShip::look(Field& field,LinkedList& ships, ofstream& mof){
+    void SuperShip::look(Field& field,LinkedList& ships) {
         int startingX=0,endingX=0,startingY=0,endingY=0;
             int NewP=0;
             //remember row , column left -> down! so y is row and x is column
             //for findShipname function,provide x first then y
             if( this->posX-1<0 || this->posY-1<0 || this->posX+2>9 || this->posY+2>9){
                 if(this->posX-1<0 && this->posY-1<0){ //top left
-                    //cout <<"Enter top left" << endl;
+                    //cout <<"Enter top left" << std::endl;
                     startingX=this->posX;
                     startingY=this->posY;
                     endingX=this->posX+2;
                     endingY=this->posY+2;
                 }else if(this->posX+2>9 && this->posY-1<0){ //top right
-                    //cout <<"Enter top right" << endl;
+                    //cout <<"Enter top right" << std::endl;
                     startingX=this->posX-1;
                     startingY=this->posY;
                     endingX=this->posX+1;
                     endingY=this->posY+2; 
                 }else if(this->posX-1<0 && this->posY+2>9){
-                    //cout <<"Enter bottom left" << endl;
+                    //cout <<"Enter bottom left" << std::endl;
                     startingX=this->posX;
                     startingY=this->posY-1;
                     endingX=this->posX+2;
                     endingY=this->posY+1;    
                 }else if(this->posX+2>9 && posY+2>9){
-                    //cout <<"Enter bottom right" << endl;
+                    //cout <<"Enter bottom right" << std::endl;
                     startingX=this->posX-1;
                     startingY=this->posY-1;
                     endingX=this->posX+1;
                     endingY=this->posY+1;  
                 }else if(this->posX-1<0){
-                    //cout <<"Enter left" << endl;
+                    //cout <<"Enter left" << std::endl;
                     startingX=this->posX;
                     startingY=this->posY-1;
                     endingX=this->posX+2;
                     endingY=this->posY+2;  
                 }else if(this->posY-1<0){
-                    //cout <<"Enter top" << endl;
+                    //cout <<"Enter top" << std::endl;
                     startingX=this->posX-1;
                     startingY=this->posY;
                     endingX=this->posX+2;
                     endingY=this->posY+2;  
                 }else if(this->posX+2>9){
-                   //cout <<"Enter right" << endl;
+                   //cout <<"Enter right" << std::endl;
                     startingX=this->posX-1;
                     startingY=this->posY-1;
                     endingX=this->posX+1;
                     endingY=this->posY+2;  
                 }else if(this->posY+2>9){
-                    //cout <<"Enter down" << endl;
+                    //cout <<"Enter down" << std::endl;
                     startingX=this->posX-1;
                     startingY=this->posY-1;
                     endingX=this->posX+1;
                     endingY=this->posY+1;  
                 }
             }else{
-                //cout<<"Enter ram" << endl;
+                //cout<<"Enter ram" << std::endl;
                 startingX = (this->posX)-1;
-                //cout << startingX << endl;
+                //cout << startingX << std::endl;
                 endingX = (this->posX)+2;
-                //cout << endingX << endl;
+                //cout << endingX << std::endl;
                 startingY = (this->posY)-1;
-                //cout << startingY << endl;
+                //cout << startingY << std::endl;
                 endingY = (this->posY+2);
-                //cout << endingY << endl;
+                //cout << endingY << std::endl;
             }
 
             for(int row=startingY;row<endingY;row++){
                 for(int column=startingX;column<endingX;column++){
-                    //cout <<column<<","<<row<<endl;
-                    //cout<<ships.findShipname(column,row)<<endl;
+                    //cout <<column<<","<<row<<std::endl;
+                    //cout<<ships.findShipname(column,row)<<std::endl;
                     if(field.checkCell(row,column)==ships.findShipname(column,row)&&field.checkCell(row,column)!=this->Ship_name&&ships.findShipTeam(column,row)!=this->Team_name){
-                        mof<<this->Ship_name<<" found Enemy ship: "<<ships.findShipname(column,row)<<" at (" << column <<","<<row<<") " << endl;
+                        mof<<this->Ship_name<<" found Enemy ship: "<<ships.findShipname(column,row)<<" at (" << column <<","<<row<<") " << std::endl;
                         if( row==this->posY-1 && column==this->posX || row==posY+1 && column==this->posX || column==posX+1 && row==this->posY || column==posX-1 && row==this->posY){
                         this->nextX=column;
                         this->nextY=row;
@@ -1253,11 +1214,11 @@ void SuperShip::look(Field& field,LinkedList& ships, ofstream& mof){
                         break;
                         }
                     }else if(field.checkCell(row,column)==ships.findShipname(column,row)&&field.checkCell(row,column)!=this->Ship_name&&ships.findShipTeam(column,row)==this->Team_name){
-                        mof<<this->Ship_name<<" found Freindly Ship: "<<ships.findShipname(column,row)<<" at (" << column <<","<<row<<") " << endl;
+                        mof<<this->Ship_name<<" found Freindly Ship: "<<ships.findShipname(column,row)<<" at (" << column <<","<<row<<") " << std::endl;
                     }
                     if(field.checkCell(row,column)=="0" || (field.checkCell(row,column)!=this->Ship_name && ships.findShipTeam(column,row)==this->Team_name)){
                         if( row==this->posY-1 && column==this->posX || row==posY+1 && column==this->posX || column==posX+1 && row==this->posY || column==posX-1 && row==this->posY){
-                            //cout<<this->Ship_name<<" can move to "<<column<<","<<row<<endl;
+                            //cout<<this->Ship_name<<" can move to "<<column<<","<<row<<std::endl;
                             ++NewP;
                         }
                     }
@@ -1266,7 +1227,7 @@ void SuperShip::look(Field& field,LinkedList& ships, ofstream& mof){
             if(NewP!=0){  //laszy ass way to decide next move :)
                 CanMove = true;
                 int decide = (rand() % NewP)+1;
-                //cout << decide << endl;
+                //cout << decide << std::endl;
                 int reaching=0;
                 for(int row=startingY;row<endingY;row++){
                     for(int column=startingX;column<endingX;column++){
@@ -1280,7 +1241,7 @@ void SuperShip::look(Field& field,LinkedList& ships, ofstream& mof){
                                         //cout<<this->nextX<<" and "<<this->nextY;
                                         break;
                                     }
-                                    //cout<<reaching<<endl;
+                                    //cout<<reaching<<std::endl;
                                 }
                             }
                         }
@@ -1290,14 +1251,13 @@ void SuperShip::look(Field& field,LinkedList& ships, ofstream& mof){
                 CanMove=true;
             }
     }
-
-void SuperShip::step(Field& field,LinkedList& ships,Queue& DESships,Stack& uS, ofstream& mof){
+    void SuperShip::step(Field& field,LinkedList& ships,Queue& DESships,Stack& uS){
         if(CanMove){
                 if(ships.findShipTeam(this->nextX,this->nextY)==this->Team_name && field.checkCell(this->nextY,this->nextX)!="0"){
-                    mof<<this->Ship_name<<" step on friendly ship: "<<ships.findShipname(this->nextX,this->nextY)<< "(" << this->nextX << "," << this->nextY <<")"<< endl; 
+                    mof<<this->Ship_name<<" step on fristd::endly ship: "<<ships.findShipname(this->nextX,this->nextY)<< "(" << this->nextX << "," << this->nextY <<")"<< std::endl; 
                     if(ships.findShipPtr(this->nextX,this->nextY)->Ship_lives>1){
                         ships.findShipPtr(this->nextX,this->nextY)->Ship_lives--;
-                        mof<<ships.findShipname(this->nextX,this->nextY)<<" remain "<<ships.findShipPtr(this->nextX,this->nextY)->Ship_lives <<" lives."<<endl;
+                        mof<<ships.findShipname(this->nextX,this->nextY)<<" remain "<<ships.findShipPtr(this->nextX,this->nextY)->Ship_lives <<" lives."<<std::endl;
                         if(ships.findShipPtr(this->nextX,this->nextY)->Ship_upgrade==false){
                             DESships.enqueue(ships.findShipPtr(this->nextX,this->nextY));
                         }
@@ -1311,7 +1271,7 @@ void SuperShip::step(Field& field,LinkedList& ships,Queue& DESships,Stack& uS, o
                         CanMove=false;
                     }else if(ships.findShipPtr(this->nextX,this->nextY)->Ship_lives==1 && ships.findShipPtr(this->nextX,this->nextY)->Ship_die==false){
                         ships.findShipPtr(this->nextX,this->nextY)->Ship_die==true;
-                        mof << this->Ship_name << " step on " << field.checkCell(this->nextY,this->nextX) << " and eliminated it!" << endl;
+                        mof << this->Ship_name << " step on " << field.checkCell(this->nextY,this->nextX) << " and eliminated it!" << std::endl;
                         ships.deleteNode(ships.findShipPtr(this->nextX,this->nextY));
                         field.updateField(this,this->nextY,this->nextX);
                         field.FieldBack(this->posY,this->posX);
@@ -1322,10 +1282,10 @@ void SuperShip::step(Field& field,LinkedList& ships,Queue& DESships,Stack& uS, o
                         CanMove=false;
                     }
                 }else if(ships.findShipTeam(this->nextX,this->nextY)!=this->Team_name && field.checkCell(this->nextY,this->nextX)!="0"){
-                    mof<<this->Ship_name<<" step on enemy ship: "<<ships.findShipname(this->nextX,this->nextY)<< "(" << this->nextX << "," << this->nextY <<")"<< endl; 
+                    mof<<this->Ship_name<<" step on enemy ship: "<<ships.findShipname(this->nextX,this->nextY)<< "(" << this->nextX << "," << this->nextY <<")"<< std::endl; 
                     if(ships.findShipPtr(this->nextX,this->nextY)->Ship_lives>1){
                         ships.findShipPtr(this->nextX,this->nextY)->Ship_lives--;
-                        mof<<ships.findShipname(this->nextX,this->nextY)<<" remain "<<ships.findShipPtr(this->nextX,this->nextY)->Ship_lives <<" lives."<<endl;
+                        mof<<ships.findShipname(this->nextX,this->nextY)<<" remain "<<ships.findShipPtr(this->nextX,this->nextY)->Ship_lives <<" lives."<<std::endl;
                         if(ships.findShipPtr(this->nextX,this->nextY)->Ship_upgrade==false){
                             DESships.enqueue(ships.findShipPtr(this->nextX,this->nextY));
                         }
@@ -1339,7 +1299,7 @@ void SuperShip::step(Field& field,LinkedList& ships,Queue& DESships,Stack& uS, o
                         CanMove=false;
                     }else if(ships.findShipPtr(this->nextX,this->nextY)->Ship_lives==1 && ships.findShipPtr(this->nextX,this->nextY)->Ship_die==false){
                         ships.findShipPtr(this->nextX,this->nextY)->Ship_die=true;
-                        mof << this->Ship_name << " step on " << field.checkCell(this->nextY,this->nextX) << " and eliminated it!" << endl;
+                        mof << this->Ship_name << " step on " << field.checkCell(this->nextY,this->nextX) << " and eliminated it!" << std::endl;
                         ships.deleteNode(ships.findShipPtr(this->nextX,this->nextY));
                         field.updateField(this,this->nextY,this->nextX);
                         field.FieldBack(this->posY,this->posX);
@@ -1351,7 +1311,7 @@ void SuperShip::step(Field& field,LinkedList& ships,Queue& DESships,Stack& uS, o
                         this->Ship_kill_count++;
                     }
                 }else if(field.checkCell(this->nextY,this->nextX)=="0"){
-                    mof<<this->Ship_name<<" move to (" << this->nextX << "," << this->nextY <<")"<< endl; 
+                    mof<<this->Ship_name<<" move to (" << this->nextX << "," << this->nextY <<")"<< std::endl; 
                     field.updateField(this,this->nextY,this->nextX);
                     field.FieldBack(this->posY,this->posX);
                     this->posX=this->nextX;
@@ -1361,11 +1321,10 @@ void SuperShip::step(Field& field,LinkedList& ships,Queue& DESships,Stack& uS, o
                     CanMove=false;
                 }
             }else{
-                mof<<this->Ship_type<<" is bugging" << endl;
+                mof<<this->Ship_type<<" is bugging" << std::endl;
             }
     }
-    
-void SuperShip::shoot(Field& field,LinkedList& ships,Queue& DESships,Stack& uS, ofstream& mof) {
+    void SuperShip::shoot(Field& field,LinkedList& ships,Queue& DESships,Stack& uS){
         int x=0,y=0;
             int shots=3;
             int max_range = 5;
@@ -1379,17 +1338,17 @@ void SuperShip::shoot(Field& field,LinkedList& ships,Queue& DESships,Stack& uS, 
                 y = (rand() % 11)-5;
                 calXY = abs(x) + abs(y);
                 }
-                //cout <<x << " "<<y<<endl;
+                //cout <<x << " "<<y<<std::endl;
                 if(ships.findShipTeam(posX+x,posY+y)!=this->Team_name || field.checkCell(posY+y,posX+x)=="0" || field.checkCell(posY+y,posX+x)=="1"){
                     if(field.checkCell(posY+y,posX+x)=="0" || field.checkCell(posY+y,posX+x)=="1" ){
-                        mof << this->Ship_name << " decide to shoot at "<<"(" <<this->posX+x<<","<<this->posY+y<<") and missed." <<endl;
+                        mof << this->Ship_name << " decide to shoot at "<<"(" <<this->posX+x<<","<<this->posY+y<<") and missed." <<std::endl;
                     }
                     if(field.checkCell(posY+y,posX+x)==ships.findShipname(posX+x,posY+y)){
-                        mof << this->Ship_name << " decide to shoot at "<<field.checkCell(posY+y,posX+x)<<"(" <<this->posX+x<<","<<this->posY+y<<") and successful!" <<endl;
+                        mof << this->Ship_name << " decide to shoot at "<<field.checkCell(posY+y,posX+x)<<"(" <<this->posX+x<<","<<this->posY+y<<") and successful!" <<std::endl;
                         if(ships.findShipPtr(posX+x,posY+y)->Ship_lives>1){
                             ships.findShipPtr(posX+x,posY+y)->Ship_lives--;
                             this->Ship_kill_count++;
-                            mof<<ships.findShipname(posX+x,posY+y)<<" remain "<<ships.findShipPtr(posX+x,posY+y)->Ship_lives <<" lives."<<endl;;
+                            mof<<ships.findShipname(posX+x,posY+y)<<" remain "<<ships.findShipPtr(posX+x,posY+y)->Ship_lives <<" lives."<<std::endl;;
                             if(ships.findShipPtr(posX+x,posY+y)->Ship_upgrade==false){
                                 DESships.enqueue(ships.findShipPtr(posX+x,posY+y));
                             }
@@ -1397,7 +1356,7 @@ void SuperShip::shoot(Field& field,LinkedList& ships,Queue& DESships,Stack& uS, 
                             field.FieldBack(posY+y,posX+x);
                         }else if(ships.findShipPtr(posX+x,posY+y)->Ship_lives==1 && ships.findShipPtr(this->posX+x,this->posY+y)->Ship_die==false){
                             ships.findShipPtr(this->posX+x,this->posY+y)->Ship_die=true;
-                            mof << this->Ship_name << " eliminated "<<field.checkCell(posY+y,posX+x)<<"(" <<this->posX+x<<","<<this->posY+y<<") !" <<endl;
+                            mof << this->Ship_name << " eliminated "<<field.checkCell(posY+y,posX+x)<<"(" <<this->posX+x<<","<<this->posY+y<<") !" <<std::endl;
                             ships.deleteNode(ships.findShipPtr(posX+x,posY+y)); 
                             field.FieldBack(posY+y,posX+x);
                         }
@@ -1405,26 +1364,23 @@ void SuperShip::shoot(Field& field,LinkedList& ships,Queue& DESships,Stack& uS, 
                 }  
             }
     }
-
-void SuperShip::actions(Field& field,LinkedList& ships,Queue& DESships,Stack& uS, ofstream& mof) {
+    void SuperShip::actions(Field& field,LinkedList& ships,Queue& DESships,Stack& uS){
             if(!this->ShootPosition){
                 updateF(field);
                 this->ShootPosition=true;
             }
-            mof<<this->Ship_type<<" "<<this->Ship_name<<" from Team " << this->Team_name <<" at (" << this->posX<<","<<this->posY<<") start actions:"<< endl;
-            look(field,ships, mof);
-            step(field,ships,DESships,uS, mof);
+            mof<<this->Ship_type<<" "<<this->Ship_name<<" from Team " << this->Team_name <<" at (" << this->posX<<","<<this->posY<<") start actions:"<< std::endl;
+            look(field,ships);
+            step(field,ships,DESships,uS);
             if(this->Ship_upgrade){
                 return;
             }
-            shoot(field,ships,DESships,uS, mof);
-            mof<<endl;
+            shoot(field,ships,DESships,uS);
+            mof<<std::endl;
         }
 
 
-//--------------------------------------------------------------------------------------------------------------------------------------------
-
-SniperShip::SniperShip(char Team_name, string Ship_name,Field& field, LinkedList& ships, Queue& DESships,Stack& uS, ofstream& mof) {
+    SniperShip::SniperShip(char Team_name, std::string Ship_name,Field& field, LinkedList& ships, Queue& DESships,Stack& uS) {
         this->Team_name = Team_name;
         this->Ship_name = Ship_name;
         this->Ship_type = "SniperShip";
@@ -1438,7 +1394,7 @@ SniperShip::SniperShip(char Team_name, string Ship_name,Field& field, LinkedList
                 }
     }
 
-    void SniperShip::look(Field& field, LinkedList& ships, ofstream& mof) {
+    void SniperShip::look(Field& field, LinkedList& ships){
         if (!targetLocked) {
             for (int row = 0; row < field.height; ++row) {
                 for (int col = 0; col < field.width; ++col) {
@@ -1446,7 +1402,7 @@ SniperShip::SniperShip(char Team_name, string Ship_name,Field& field, LinkedList
                         targetX = col;
                         targetY = row;
                         targetLocked = true;
-                        mof << this->Ship_name << " locks onto target at (" << targetX << "," << targetY << ") and will shoot next turn!" << endl;
+                        mof << this->Ship_name << " locks onto target at (" << targetX << "," << targetY << ") and will shoot next turn!" << std::endl;
                         return;
                     }
                 }
@@ -1454,11 +1410,11 @@ SniperShip::SniperShip(char Team_name, string Ship_name,Field& field, LinkedList
         }
     }
 
-    void SniperShip::shoot(Field& field, LinkedList& ships, Queue& DESships,Stack& uS, ofstream& mof) {
+    void SniperShip::shoot(Field& field, LinkedList& ships, Queue& DESships,Stack& uS){
             if (targetLocked) {
-                string targetName = ships.findShipname(targetX, targetY);
+                std::string targetName = ships.findShipname(targetX, targetY);
                 if (targetName != "nothing" && ships.findShipTeam(targetX, targetY) != this->Team_name) {
-                    mof << this->Ship_name << " shoots at (" << targetX << "," << targetY << ") and hits " << targetName << "!" << endl;
+                    mof << this->Ship_name << " shoots at (" << targetX << "," << targetY << ") and hits " << targetName << "!" << std::endl;
                     Ship* targetShip = ships.findShipPtr(targetX, targetY);
                     if(targetShip->Ship_lives > 1){
                     targetShip->Ship_lives--;
@@ -1470,28 +1426,29 @@ SniperShip::SniperShip(char Team_name, string Ship_name,Field& field, LinkedList
                     field.FieldBack(targetY,targetX);
                     }else if (targetShip->Ship_lives == 1 && targetShip->Ship_die==false) {
                         targetShip->Ship_die=true;
-                        mof << targetName << " is destroyed!" << endl;
+                        mof << targetName << " is destroyed!" << std::endl;
                         ships.deleteNode(targetShip);
                         field.FieldBack(targetY, targetX);
                     }
                 } else {
-                    mof << this->Ship_name << " shoots at (" << targetX << "," << targetY << ") but the target disappear." << endl;
+                    mof << this->Ship_name << " shoots at (" << targetX << "," << targetY << ") but the target disappear." << std::endl;
                 }
                 targetLocked = false; 
             }
     }
 
-    void SniperShip::actions(Field& field, LinkedList& ships, Queue& DESships,Stack& uS, ofstream& mof)  {
+    void SniperShip::actions(Field& field, LinkedList& ships, Queue& DESships,Stack& uS) {
         if(this->record%2!=0 || this->record==0){
-            mof << this->Ship_type << " " << this->Ship_name << " from Team " << this->Team_name << " at (" << this->posX << "," << this->posY << ") start actions:" << endl;
+            mof << this->Ship_type << " " << this->Ship_name << " from Team " << this->Team_name << " at (" << this->posX << "," << this->posY << ") start actions:" << std::endl;
             this->record++;
-            look(field, ships, mof);
+            look(field, ships);
         }else if(this->record%2==0 && this->record!=0){
             this->record++;
-            mof << this->Ship_type << " " << this->Ship_name << " from Team " << this->Team_name << " at (" << this->posX << "," << this->posY << ") start actions:" << endl;
-            shoot(field, ships, DESships,uS, mof);
+            mof << this->Ship_type << " " << this->Ship_name << " from Team " << this->Team_name << " at (" << this->posX << "," << this->posY << ") start actions:" << std::endl;
+            shoot(field, ships, DESships,uS);
             }else{
-            mof<<"SniperShip Bugging lol." << endl;
+            mof<<"SniperShip Bugging lol." << std::endl;
         }
-            mof << endl;
+            mof << std::endl;
     }
+

@@ -1,28 +1,28 @@
 #ifndef STACK_H
 #define STACK_H
-#include <fstream>
-#include <iostream>
-using namespace std;
+#include "NODE.H"
+#include "SHIP.H"
 
-#include "Node.h"
-
-class Ship;
 class Stack{
     protected:
         struct Node{
             Ship* shipPtr;
             Node * next;
         };
-        Ship* pop();
-    public:
         Node* top;
+    public:
         int size=0;
         const int maxSize=5;
-        Stack() : top(nullptr),size(0){}
+        Stack();
+
         bool isEmpty() const;
         bool isFull() const;
-        void push(Ship* shipPtr, ofstream& mof);
-        Ship* pop(ofstream& mof);
+
+        void push(Ship* shipPtr);
+
+        Ship* pop();
+
+
         ~Stack();
 };
 

@@ -1,22 +1,14 @@
-
 #ifndef SIMULATION_H
 #define SIMULATION_H
-
+#include "QUEUE.H"
+#include "LINKEDLIST.H"
+#include "FIELD.H"
+#include "STACK.H"
 #include <iostream>
-#include <cstdlib>
-#include<ctime>
-#include <fstream>
-using namespace std;
-
-#include "LinkedList.h"
-#include "Stack.h"
-#include "Queue.h"
-#include "Field.h"
-
 
 class Simulation{
     private:
-        string ignore_line, Ship_Type, Ship_symbol, Ship_Name;
+        std::string ignore_line, Ship_Type, Ship_symbol, Ship_Name;
         char Team_Name;
         int ships_count_in_Team, ship_num;
     public:
@@ -25,10 +17,12 @@ class Simulation{
         Field field;
         LinkedList ships;
         Stack uS,uS2;
-        ofstream mof;
-
+        
         Simulation();
+
         void StartGame();
+
         ~Simulation();
 };
+
 #endif

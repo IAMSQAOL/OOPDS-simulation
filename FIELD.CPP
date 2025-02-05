@@ -1,11 +1,13 @@
-#include "../include/Field.h"
-#include "../include/Simulation.h"
+#include "FIELD.H"
+#include "OUTPUT.H"
+#include <iostream>
+#include <fstream>
 
-Field::Field(){};
-void Field::initialize(const string& filename, ofstream& mof) {
-            ifstream file(filename);
+Field::Field(){}
+void Field::initialize(const std::string& filename) {
+            std::ifstream file(filename);
             if (!file) {
-                mof << "File not found" << endl;
+                mof << "File not found" << std::endl;
                 exit(1);
             }
 
@@ -33,7 +35,7 @@ void Field::initialize(const string& filename, ofstream& mof) {
             file.close();
         }
 
-void Field::printField(ofstream& mof) {
+        void Field::printField() {
             for (int i = 0; i < height; ++i) {
                 for (int j = 0; j < width; ++j) {
                     mof << field[i][j];
@@ -43,11 +45,11 @@ void Field::printField(ofstream& mof) {
                         mof << " "; // One space for multi-character strings
                     }
                 }
-                mof << endl;
+                mof << std::endl;
             }
         }
 
-void Field::printBackField(ofstream& mof) {
+        void Field::printBackField() {
             for (int i = 0; i < height; ++i) {
                 for (int j = 0; j < width; ++j) {
                     mof << backupfield[i][j];
@@ -57,22 +59,21 @@ void Field::printBackField(ofstream& mof) {
                         mof << " "; // One space for multi-character strings
                     }
                 }
-                mof << endl;
+                mof << std::endl;
             }
         }
 
-void Field::updateField(Ship* shipPtr, int y, int x) {
+        void Field::updateField(Ship* shipPtr, int y, int x) {
                 field[y][x] = shipPtr->Ship_name;
         }
 
-void Field::FieldBack(int y,int x){
+        void Field::FieldBack(int y,int x){
             if(backupfield[y][x]=="0"){
                 field[y][x] = '0';
             }else if(backupfield[y][x]=="1"){
                  field[y][x] = '1';
             }
         }
-
-string Field::checkCell(int y, int x) {
+        std::string Field::checkCell(int y, int x) {
             return field[y][x];
         }

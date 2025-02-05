@@ -1,2 +1,0 @@
-g++ -Iinclude -o WarShip_Simulation src/*.cpp
-g++ main.cpp src\Field.cpp src\LinkedList.cpp src\Queue.cpp src\Ship.cpp src\Simulation.cpp src\Stack.cpp -o main
