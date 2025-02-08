@@ -3,9 +3,24 @@
 #include "SHIP.H"
 #include <fstream>
 #include <iostream>
-        
+
+        //Simulation::Simulation(){}
         Simulation::Simulation(){
-            std::ifstream file("game.txt");
+            std::string gamefile;
+            while (true) {
+                std::cout << "Please enter the filename(example: game2.txt): ";
+                std::cin >> gamefile;
+
+                std::ifstream tfile(gamefile);
+                if (tfile) {
+                    tfile.close();
+                    break;
+                } else {
+                    std::cout << "File not found. Please re-enter the filename." << std::endl;
+                }
+            }
+
+            std::ifstream file(gamefile);
             if (!file) {
                 mof << "File not found" << std::endl;
                 exit(1);
@@ -26,12 +41,12 @@
                     }
                 }
             }
-            Ship* amphibious1 = Ship::createShip ('B', "Amphibious", ";1", field, ships, DESships,uS);
-            Ship* amphibious2 =  Ship::createShip('B', "Amphibious", ";2",  field, ships, DESships,uS);
-            Ship* Sniper =  Ship::createShip('A', "SniperShip", "~S",  field, ships, DESships,uS);
-            ships.append(amphibious1);
-            ships.append(amphibious2);
-            ships.append(Sniper);
+            //Ship* amphibious1 = Ship::createShip ('B', "Amphibious", ";1", field, ships, DESships,uS);
+            //Ship* amphibious2 =  Ship::createShip('B', "Amphibious", ";2",  field, ships, DESships,uS);
+            //Ship* Sniper =  Ship::createShip('A', "SniperShip", "~S",  field, ships, DESships,uS);
+            //ships.append(amphibious1);
+            //ships.append(amphibious2);
+            //ships.append(Sniper);
             file.close();
             StartGame();
         }

@@ -11,6 +11,7 @@ class Simulation{
         std::string ignore_line, Ship_Type, Ship_symbol, Ship_Name;
         char Team_Name;
         int ships_count_in_Team, ship_num;
+
     public:
         int iterations;
         Queue DESships;
@@ -19,6 +20,7 @@ class Simulation{
         Stack uS,uS2;
         
         Simulation();
+
 
         void StartGame();
 

@@ -5,6 +5,8 @@
 #include "SIMULATION.H"
 
 int main(){
+   
+
      try {
         openF("output.txt");
 
