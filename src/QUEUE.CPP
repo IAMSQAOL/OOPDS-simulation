@@ -1,11 +1,22 @@
+/**********|**********|**********|
+Program: QUEUE.CPP
+Course: Object Oriented Programming and Data Structures
+Trimester: 2430
+Name: YEE SI SHUN , GOH CHUN YONG , CHEAH CHUN YONG , LOKE KAR HEI
+ID: 241UC24157 , 241UC24158 , 241UC2417G , 241UC24168
+Lecture Section: TC1L
+Tutorial Section: TT4L
+Email: yee.si.shun@gstudent.mmu.edu.my , goh.chun.yong@student.mmu.edu.my , cheach.chun.yong@student.mmu.edu.my , loke.kar.hei@student.mmu.edu.my
+Phone: 011-63303212 , 011-10758049 , 011-59252689 , 017-2900377
+**********|**********|**********/
+
 #include <iostream>
-#include "QUEUE.H"
-#include "FIELD.H"
-#include "OUTPUT.H"
-#include "LINKEDLIST.H"
+#include "../include/QUEUE.H"
+#include "../include/FIELD.H"
+#include "../include/OUTPUT.H"
+#include "../include/LINKEDLIST.H"
 
-Queue::Queue() : front(nullptr), rear(nullptr){} //do nothing
-
+Queue::Queue() : front(nullptr), rear(nullptr){} 
         Queue::~Queue(){
             clear();
         }
@@ -17,7 +28,7 @@ Queue::Queue() : front(nullptr), rear(nullptr){} //do nothing
                 temp = temp->next;
             }
         }
-
+        
         Queue& Queue::operator=(const Queue& other) {
             if (this == &other) return *this;
             clear();
@@ -71,6 +82,7 @@ Queue::Queue() : front(nullptr), rear(nullptr){} //do nothing
             temp->shipPtr->posX = newX;
             temp->shipPtr->posY = newY;
             mof << temp->shipPtr->Ship_name <<" return to battlefield at ("<<newX <<","<<newY<<") !"<<std::endl;
+            std::cout << temp->shipPtr->Ship_name <<" return to battlefield at ("<<newX <<","<<newY<<") !"<<std::endl;
             field.updateField(temp->shipPtr, newY, newX);
             ships.append(temp->shipPtr);
             front = front -> next;
